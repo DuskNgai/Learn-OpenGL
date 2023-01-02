@@ -1,0 +1,12 @@
+# Directories
+.vscode
+bin
+build
+test
+
+# Files
+assets/images/*
+!assets/images/hexagram.png
+!assets/images/cornell.png
+imgui.ini
+run.sh
