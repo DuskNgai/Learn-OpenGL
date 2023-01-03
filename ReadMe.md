@@ -34,7 +34,7 @@ make -j
 
 目前进度：
 
-- [ ] Getting Started
+- [x] Getting Started
     - [x] OpenGL
     - [x] Creating a Window
     - [x] Hello Window
@@ -42,8 +42,8 @@ make -j
     - [x] Shaders
     - [x] Textures
     - [x] Transformations
-    - [ ] Coordinate System
-    - [ ] Camera
+    - [x] Coordinate System
+    - [x] Camera
 - [ ] Lighting
     - [ ] Colors
     - [ ] Basic Lighting

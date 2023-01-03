@@ -100,7 +100,7 @@ void ExampleLayer::OnAttach() {
         this->m_frame_buffer = Dusk::FrameBuffer::Create(props);
     }
     // Camera track ball.
-    this->m_trackball = std::make_unique<Dusk::TrackBall>(std::make_unique<Dusk::PerspectiveCamera>());
+    this->m_trackball = std::make_unique<Dusk::TrackBall>(Dusk::Camera::Create(Dusk::CameraType::Perspective));
 }
 
 void ExampleLayer::OnDetach() {}
@@ -194,6 +194,11 @@ void ExampleLayer::OnImGuiRender() {
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_bg_color));
+
+    static int camera_type = (int)Dusk::CameraType::Perspective;
+    ImGui::Combo("Camera Type", (int*)&camera_type, "Orthographic Camera\0Perspective Camera\0");
+    this->m_trackball->SetCameraType((Dusk::CameraType)camera_type);
+
     // ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->GetColorAttachment(), ImVec2(640, 480));
 
     ImGui::End();
