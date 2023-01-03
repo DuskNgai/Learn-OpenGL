@@ -10,6 +10,8 @@ ExampleLayer::ExampleLayer()
 void ExampleLayer::OnAttach() {
     // A shader library for managing shaders.
     this->m_shader_library = std::make_unique<Dusk::ShaderLibrary>();
+    // Camera track ball.
+    this->m_trackball = std::make_unique<Dusk::TrackBall>(Dusk::Camera::Create(Dusk::CameraType::Perspective));
     // Tetrahedron.
     {
         // clang-format off
@@ -99,8 +101,6 @@ void ExampleLayer::OnAttach() {
         props.Samples = 1;
         this->m_frame_buffer = Dusk::FrameBuffer::Create(props);
     }
-    // Camera track ball.
-    this->m_trackball = std::make_unique<Dusk::TrackBall>(Dusk::Camera::Create(Dusk::CameraType::Perspective));
 }
 
 void ExampleLayer::OnDetach() {}

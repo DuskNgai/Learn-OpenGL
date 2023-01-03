@@ -12,7 +12,8 @@ out vec2 v_TexCoord;
 out float v_TexIndex;
 out float v_TilingScale;
 
-uniform mat4 u_ViewProjection;
+uniform mat4 u_Projection;
+uniform mat4 u_View;
 uniform mat4 u_Model;
 
 void main() {
@@ -20,5 +21,5 @@ void main() {
     v_TexCoord = a_TexCoord;
     v_TexIndex = a_TexIndex;
     v_TilingScale = a_TilingScale;
-    gl_Position = u_ViewProjection * u_Model * vec4(a_Position, 1.0);
+    gl_Position = u_Projection * u_View * u_Model * vec4(a_Position, 1.0);
 }

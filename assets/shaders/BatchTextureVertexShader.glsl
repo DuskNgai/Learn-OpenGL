@@ -12,7 +12,8 @@ out vec2 v_TexCoord;
 out float v_TexIndex;
 out float v_TilingScale;
 
-uniform mat4 u_ViewProjection;
+uniform mat4 u_Projection;
+uniform mat4 u_View;
 
 void main() {
     v_Color = a_Color;
@@ -20,5 +21,5 @@ void main() {
     v_TexIndex = a_TexIndex;
     v_TilingScale = a_TilingScale;
     // a_Position has already been in world space.
-    gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+    gl_Position = u_Projection * u_View * vec4(a_Position, 1.0);
 }
