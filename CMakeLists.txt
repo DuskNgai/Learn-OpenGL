@@ -48,6 +48,7 @@ list(APPEND LEARN_OPENGL_LIBRARIES
 
 # The executable file
 aux_source_directory("src" SOURCE_FILES)
+aux_source_directory("src/Material" SOURCE_FILES)
 add_executable(learngl ${SOURCE_FILES})
 target_include_directories(learngl PRIVATE ${LEARN_OPENGL_INCLUDES})
 target_link_libraries(learngl PRIVATE ${LEARN_OPENGL_LIBRARIES})

@@ -57,6 +57,7 @@ void LightLayer::OnAttach() {
         // clang-format on
 
         this->m_cube_vao = Dusk::VertexArray::Create();
+
         auto vertex_buffer = Dusk::VertexBuffer::Create(sizeof(vertices), vertices);
         vertex_buffer->SetLayout(Dusk::BufferLayout({
             {Dusk::ShaderDataType::Vec3, "a_Position"},
@@ -76,33 +77,42 @@ void LightLayer::OnAttach() {
     {
         this->m_shader_library = std::make_unique<Dusk::ShaderLibrary>();
         this->m_shader_library->Add(
-            "Cube",
+            "PureColor",
             Dusk::Shader::Create(
-                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/LightingVertexShader.glsl")),
-                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/CubeFragmentShader.glsl"))
+                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/ObjectVertexShader.glsl")),
+                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/PureColorFragmentShader.glsl"))
             )
         );
-        this->m_shader_library->Get("Cube")->Bind();
-        this->m_shader_library->Get("Cube")->SetVec3("u_ObjectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-        this->m_shader_library->Get("Cube")->SetVec3("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-
+        this->m_shader_library->Add(
+            "Texture",
+            Dusk::Shader::Create(
+                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/ObjectVertexShader.glsl")),
+                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/TextureFragmentShader.glsl"))
+            )
+        );
         this->m_shader_library->Add(
             "Light",
             Dusk::Shader::Create(
-                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/LightingVertexShader.glsl")),
-                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/LightingFragmentShader.glsl"))
+                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/ObjectVertexShader.glsl")),
+                Dusk::ReadTextFile(Dusk::GetFilePath("assets/shaders/lighting/LightFragmentShader.glsl"))
             )
         );
     }
-    // Texture.
+    // Texture & Material & Light.
     {
+        this->m_material = s_named_pure_color_materials;
+        for (auto [name, material]: this->m_material) {
+            material->SetShader(this->m_shader_library->Get("PureColor"));
+        }
+        this->m_material.emplace_back("Texture", std::make_shared<TextureMaterial>(
+            this->m_shader_library->Get("Texture"), Dusk::Texture2D::Create(Dusk::GetFilePath("assets/images/container2.png")), Dusk::Texture2D::Create(Dusk::GetFilePath("assets/images/container2_specular.png")), 64.0f
+        ));
+
+        this->m_light = std::make_shared<Light>(glm::vec3{1.2f, 1.0f, 2.0f}, glm::vec3{1.0f, 1.0f, 1.0f}, glm::vec3{0.2f, 0.2f, 0.2f}, glm::vec3{0.5f, 0.5f, 0.5f}, glm::vec3{1.0f, 1.0f, 1.0f});
     }
     // Framebuffer.
     {
-        Dusk::FrameBufferProps props;
-        props.Width = 1280;
-        props.Height = 720;
-        props.Samples = 1;
+        Dusk::FrameBufferProps props{1280, 720};
         this->m_frame_buffer = Dusk::FrameBuffer::Create(props);
     }
 }
@@ -118,32 +128,60 @@ void LightLayer::OnImGuiRender() {
     ImGui::Begin("Test for ImGui.");
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_bg_color));
 
-    {
-        static int camera_type = (int)Dusk::CameraType::Perspective;
-        ImGui::Combo("Camera Type", (int*)&camera_type, "Orthographic Camera\0Perspective Camera\0");
-        this->m_trackball->SetCameraType((Dusk::CameraType)camera_type);
+    static int camera_type_idx = (int)Dusk::CameraType::Perspective;
+    static std::array<char const*, 2> camera_type{"Orthographic Camera", "Perspective Camera"};
+    if (ImGui::BeginCombo("Camera Type", camera_type[camera_type_idx])) {
+        for (std::size_t i = 0; i < camera_type.size(); ++i) {
+            bool is_selected = (camera_type_idx == i);
+            if (ImGui::Selectable(camera_type[i], is_selected)) {
+                camera_type_idx = i;
+                this->m_trackball->SetCameraType((Dusk::CameraType)camera_type_idx);
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
     }
-    ImGui::DragFloat3("Light Position", glm::value_ptr(this->m_light_pos), 0.05f);
+    if (ImGui::BeginCombo("Material Option", this->m_material[this->m_material_idx].first.c_str())) {
+        for (std::size_t i = 0; i < this->m_material.size(); ++i) {
+            bool is_selected = (this->m_material_idx == i);
+            if (ImGui::Selectable(this->m_material[i].first.c_str(), is_selected)) {
+                this->m_material_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_light->ambient));
+    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light->color));
+    ImGui::DragFloat3("Light Position", glm::value_ptr(this->m_light->position), 0.05f);
 
     ImGui::End();
 }
 
 void LightLayer::OnUpdate() {
     Dusk::RenderCommand::Clear();
-    Dusk::RenderCommand::SetClearColor(this->m_bg_color);
+    Dusk::RenderCommand::SetClearColor({this->m_light->ambient, 1.0f});
 
     this->m_trackball->OnUpdate();
 
     Dusk::Renderer::BeginScene(this->m_trackball->GetCamera());
 
-    this->m_shader_library->Get("Cube")->Bind();
-    this->m_shader_library->Get("Cube")->SetVec3("u_LightPos", this->m_light_pos);
-    Dusk::Renderer::Submit(this->m_shader_library->Get("Cube"), this->m_cube_vao.get(), glm::mat4(1.0f));
+    auto m = this->m_material[this->m_material_idx].second;
+    m->Bind("u_Material");
+    this->m_light->SetShader(m->GetShader());
+    this->m_light->Bind("u_Light");
+    Dusk::Renderer::Submit(m->GetShader().get(), this->m_cube_vao.get(), glm::mat4(1.0f));
 
-    auto model = glm::translate(glm::mat4(1.0f), this->m_light_pos) * glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-    Dusk::Renderer::Submit(this->m_shader_library->Get("Light"), this->m_light_cube_vao.get(), model);
+    auto model = glm::translate(glm::mat4(1.0f), this->m_light->position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    auto light_shader = this->m_shader_library->Get("Light");
+    light_shader->Bind();
+    light_shader->SetVec3("u_LightColor", this->m_light->color);
+    Dusk::Renderer::Submit(light_shader.get(), this->m_light_cube_vao.get(), model);
 
     Dusk::Renderer::EndScene();
 }

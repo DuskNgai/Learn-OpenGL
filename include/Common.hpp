@@ -5,8 +5,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include <fmt/core.h>
-
 // clang-format off
 #define LEARN_OPENGL_NAMESPACE_BEGIN namespace LearnGL {
 #define LEARN_OPENGL_NAMESPACE_END                     }
@@ -26,10 +24,7 @@ template<typename T> T constexpr SQRT_2      = 1.41421356237309504880l;
 template<typename T> T constexpr SQRT_3      = 1.73205080756887729353l;
 //! Constants
 
-#define STRINGIFY(x) #x
-#define STR(x) STRINGIFY(x)
-#define FILE_AND_LINE "file " __FILE__ " line " STR(__LINE__)
-
 LEARN_OPENGL_NAMESPACE_END
+// clang-format on
 
 #endif // !_LEARN_OPENGL_COMMON_CUH_

@@ -16,7 +16,7 @@ void ExampleLayer::OnAttach() {
     {
         // clang-format off
         float vertices[] = {
-            // Position, Color
+            // Position(3), Color(4)
              1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
              1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
             -1.0f, -1.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
@@ -26,7 +26,6 @@ void ExampleLayer::OnAttach() {
         // clang-format on
 
         this->m_vertex_array = Dusk::VertexArray::Create();
-        // Vertex buffer for tetrahedron.
         auto vertex_buffer = Dusk::VertexBuffer::Create(sizeof(vertices), vertices);
         vertex_buffer->SetLayout(Dusk::BufferLayout({
             {Dusk::ShaderDataType::Vec3, "a_Position"},
@@ -50,7 +49,7 @@ void ExampleLayer::OnAttach() {
     {
         // clang-format off
         float uv_vertices[] = {
-            // Position, Color, TexCoord, TexIndex, TilingScale
+            // Position(3), Color(4), TexCoord(2), TexIndex(1), TilingScale(1)
             -1.0f, -1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
             -1.0f,  1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
              1.0f,  1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
@@ -60,7 +59,6 @@ void ExampleLayer::OnAttach() {
         // clang-format on
 
         this->m_texture_vertex_array = Dusk::VertexArray::Create();
-        // Vertex buffer for texture quad.
         auto vertex_buffer = Dusk::VertexBuffer::Create(sizeof(uv_vertices), uv_vertices);
         vertex_buffer->SetLayout(Dusk::BufferLayout({
             { Dusk::ShaderDataType::Vec3,    "a_Position"},
@@ -95,10 +93,7 @@ void ExampleLayer::OnAttach() {
     }
     // Framebuffer.
     {
-        Dusk::FrameBufferProps props;
-        props.Width = 1280;
-        props.Height = 720;
-        props.Samples = 1;
+        Dusk::FrameBufferProps props{1280, 720};
         this->m_frame_buffer = Dusk::FrameBuffer::Create(props);
     }
 }
@@ -199,15 +194,15 @@ void ExampleLayer::OnImGuiRender() {
     ImGui::Combo("Camera Type", (int*)&camera_type, "Orthographic Camera\0Perspective Camera\0");
     this->m_trackball->SetCameraType((Dusk::CameraType)camera_type);
 
-    // ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->GetColorAttachment(), ImVec2(640, 480));
+    ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->GetColorAttachment(), ImVec2(1280, 720));
 
     ImGui::End();
 }
 
 void ExampleLayer::OnUpdate() {
+    this->m_frame_buffer->Bind();
     Dusk::RenderCommand::Clear();
     Dusk::RenderCommand::SetClearColor(this->m_bg_color);
-    // this->m_frame_buffer->Bind();
 
     this->m_trackball->OnUpdate();
     {
@@ -218,14 +213,14 @@ void ExampleLayer::OnUpdate() {
             for (int x = -1; x <= 1; ++x) {
                 glm::vec3 translate{1.0f * x, 1.0f * y, 0.0f};
                 glm::mat4 model = glm::translate(glm::mat4(1.0), translate) * scale;
-                Dusk::Renderer::Submit(this->m_shader_library->Get("First"), this->m_vertex_array.get(), model);
+                Dusk::Renderer::Submit(this->m_shader_library->Get("First").get(), this->m_vertex_array.get(), model);
             }
         }
 
         this->m_texture->Bind(0);
-        Dusk::Renderer::Submit(this->m_shader_library->Get("Texture"), this->m_texture_vertex_array.get(), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        Dusk::Renderer::Submit(this->m_shader_library->Get("Texture").get(), this->m_texture_vertex_array.get(), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
         this->m_alpha_texture->Bind(0);
-        Dusk::Renderer::Submit(this->m_shader_library->Get("Texture"), this->m_texture_vertex_array.get(), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        Dusk::Renderer::Submit(this->m_shader_library->Get("Texture").get(), this->m_texture_vertex_array.get(), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
         Dusk::Renderer::EndScene();
     }
@@ -248,7 +243,7 @@ void ExampleLayer::OnUpdate() {
 
         Dusk::Renderer2D::EndScene();
     }
-    // this->m_frame_buffer->Unbind();
+    this->m_frame_buffer->Unbind();
 }
 
 void ExampleLayer::OnEvent(Dusk::EventBase& e) {

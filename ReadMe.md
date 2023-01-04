@@ -45,9 +45,9 @@ make -j
     - [x] Coordinate System
     - [x] Camera
 - [ ] Lighting
-    - [ ] Colors
-    - [ ] Basic Lighting
-    - [ ] Materials
+    - [x] Colors
+    - [x] Basic Lighting
+    - [x] Materials
     - [ ] Lighting Maps
     - [ ] Light Casters
     - [ ] Multiple Lights

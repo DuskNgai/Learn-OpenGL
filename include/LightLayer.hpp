@@ -2,6 +2,8 @@
 #define _LEARN_OPENGL_LIGHT_LAYER_HPP_
 
 #include <Dusk.hpp>
+#include <Material/Material.hpp>
+#include <Light.hpp>
 #include <Common.hpp>
 
 LEARN_OPENGL_NAMESPACE_BEGIN
@@ -14,8 +16,9 @@ private:
     std::unique_ptr<Dusk::ShaderLibrary> m_shader_library;
     std::shared_ptr<Dusk::FrameBuffer> m_frame_buffer;
 
-    glm::vec4 m_bg_color{0.1f, 0.1f, 0.1f, 1.0f};
-    glm::vec3 m_light_pos{1.2f, 1.0f, 2.0f};
+    int m_material_idx{0};
+    std::vector<std::pair<std::string, std::shared_ptr<Material>>> m_material;
+    std::shared_ptr<Light> m_light;
 
 public:
     LightLayer();
