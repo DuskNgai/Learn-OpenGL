@@ -8,6 +8,8 @@ struct TextureMaterial {
 
 struct Light {
     vec3 position;
+    vec3 direction;
+    int pos_or_dir;
 
     vec3 ambient;
     vec3 diffuse;
@@ -19,6 +21,7 @@ layout(location = 0) out vec4 color;
 in vec3 v_Position;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
+in vec3 v_LightPosOrDir;
 
 uniform TextureMaterial u_Material;
 uniform Light u_Light;
@@ -29,7 +32,17 @@ void main() {
 
     // Diffuse lighting.
     vec3 normal = normalize(v_Normal);
-    vec3 light_dir = normalize(u_Light.position - v_Position); // From object to light.
+    vec3 light_dir = vec3(0.0);
+    switch (u_Light.pos_or_dir) {
+        case 0:
+            light_dir = normalize(v_LightPosOrDir - v_Position);
+            break;
+        case 1:
+             light_dir = normalize(-v_LightPosOrDir);
+            break;
+        default:
+            break;
+    }
     float cos_term = max(dot(normal, light_dir), 0.0);
     vec3 diffuse = u_Light.diffuse * cos_term * vec3(texture(u_Material.diffuse, v_TexCoord));
 
@@ -39,6 +52,13 @@ void main() {
     float specular_factor = pow(max(dot(view_dir, reflect_dir), 0.0), u_Material.shininess);
     vec3 specular = u_Light.specular * specular_factor * vec3(texture(u_Material.specular, v_TexCoord));
 
-    vec3 result = ambient + diffuse + specular;
+    // Attenuation.
+    float attenuation = 1.0;
+    if (u_Light.pos_or_dir == 0) {
+        float dist = length(v_LightPosOrDir - v_Position);
+        attenuation = 1.0 / (1.0 + 0.09 * dist + 0.032 * dist * dist);
+    }
+
+    vec3 result = (ambient + diffuse + specular) * attenuation;
     color = vec4(result, 1.0);
 }

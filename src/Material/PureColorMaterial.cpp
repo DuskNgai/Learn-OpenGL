@@ -3,21 +3,29 @@
 LEARN_OPENGL_NAMESPACE_BEGIN
 
 PureColorMaterial::PureColorMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess)
-    : PureColorMaterial(nullptr, ambient, diffuse, specular, shininess) {}
+    : PureColorMaterial(ambient, diffuse, specular, shininess, nullptr) {}
 
-PureColorMaterial::PureColorMaterial(std::shared_ptr<Dusk::Shader> shader, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess)
+PureColorMaterial::PureColorMaterial( glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<Dusk::Shader> shader)
     : Material(shader)
     , ambient(ambient)
     , diffuse(diffuse)
     , specular(specular)
     , shininess(shininess) {}
 
+std::shared_ptr<PureColorMaterial> PureColorMaterial::Create(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess) {
+    return std::make_shared<PureColorMaterial>(ambient, diffuse, specular, shininess);
+}
+
+std::shared_ptr<PureColorMaterial> PureColorMaterial::Create(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<Dusk::Shader> shader) {
+    return std::make_shared<PureColorMaterial>(ambient, diffuse, specular, shininess, shader);
+}
+
 void PureColorMaterial::Bind(std::string const& base_name) const {
-    shader->Bind();
-    shader->SetVec3(base_name + ".ambient", this->ambient);
-    shader->SetVec3(base_name + ".diffuse", this->diffuse);
-    shader->SetVec3(base_name + ".specular", this->specular);
-    shader->SetFloat(base_name + ".shininess", this->shininess);
+    this->shader->Bind();
+    this->shader->SetVec3(base_name + ".ambient", this->ambient);
+    this->shader->SetVec3(base_name + ".diffuse", this->diffuse);
+    this->shader->SetVec3(base_name + ".specular", this->specular);
+    this->shader->SetFloat(base_name + ".shininess", this->shininess);
 }
 
 LEARN_OPENGL_NAMESPACE_END

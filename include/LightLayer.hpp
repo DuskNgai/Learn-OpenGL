@@ -3,7 +3,7 @@
 
 #include <Dusk.hpp>
 #include <Material/Material.hpp>
-#include <Light.hpp>
+#include <Light/Light.hpp>
 #include <Common.hpp>
 
 LEARN_OPENGL_NAMESPACE_BEGIN
@@ -16,9 +16,11 @@ private:
     std::unique_ptr<Dusk::ShaderLibrary> m_shader_library;
     std::shared_ptr<Dusk::FrameBuffer> m_frame_buffer;
 
-    int m_material_idx{0};
+    glm::vec4 m_bg_color{0.1f, 0.1f, 0.1f, 1.0f};
+    std::size_t m_material_idx{0};
     std::vector<std::pair<std::string, std::shared_ptr<Material>>> m_material;
-    std::shared_ptr<Light> m_light;
+    std::size_t m_light_idx{0};
+    std::vector<std::pair<std::string, std::shared_ptr<Light>>> m_light;
 
 public:
     LightLayer();

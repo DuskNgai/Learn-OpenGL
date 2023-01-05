@@ -2,6 +2,8 @@
 
 struct Light {
     vec3 position;
+    vec3 direction;
+    int pos_or_dir;
 
     vec3 ambient;
     vec3 diffuse;
@@ -15,7 +17,7 @@ layout(location = 2) in vec2 a_TexCoord;
 out vec3 v_Position;
 out vec3 v_Normal;
 out vec2 v_TexCoord;
-out vec3 v_LightPos;
+out vec3 v_LightPosOrDir;
 
 uniform mat4 u_Projection;
 uniform mat4 u_View;
@@ -28,5 +30,15 @@ void main() {
     v_Normal = mat3(transpose(inverse(u_View * u_Model))) * a_Normal;
     v_TexCoord = a_TexCoord;
     // Transform world-space light position to view-space light position.
-    v_LightPos = vec3(u_View * vec4(u_Light.position, 1.0));
+    switch (u_Light.pos_or_dir) {
+        case 0:
+            v_LightPosOrDir = vec3(u_View * vec4(u_Light.position, 1.0));
+            break;
+        case 1:
+            v_LightPosOrDir = vec3(u_View * vec4(u_Light.direction, 1.0));
+            break;
+        default:
+            v_LightPosOrDir = vec3(0.0);
+            break;
+    }
 }

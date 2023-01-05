@@ -104,11 +104,19 @@ void LightLayer::OnAttach() {
         for (auto [name, material]: this->m_material) {
             material->SetShader(this->m_shader_library->Get("PureColor"));
         }
-        this->m_material.emplace_back("Texture", std::make_shared<TextureMaterial>(
-            this->m_shader_library->Get("Texture"), Dusk::Texture2D::Create(Dusk::GetFilePath("assets/images/container2.png")), Dusk::Texture2D::Create(Dusk::GetFilePath("assets/images/container2_specular.png")), 64.0f
+        this->m_material.emplace_back("Texture", TextureMaterial::Create(
+            Dusk::Texture2D::Create(Dusk::GetFilePath("assets/images/container2.png")),
+            Dusk::Texture2D::Create(Dusk::GetFilePath("assets/images/container2_specular.png")),
+            64.0f,
+            this->m_shader_library->Get("Texture")
         ));
 
-        this->m_light = std::make_shared<Light>(glm::vec3{1.2f, 1.0f, 2.0f}, glm::vec3{1.0f, 1.0f, 1.0f}, glm::vec3{0.2f, 0.2f, 0.2f}, glm::vec3{0.5f, 0.5f, 0.5f}, glm::vec3{1.0f, 1.0f, 1.0f});
+        this->m_light.emplace_back("Directional", DirectionalLight::Create(
+            {1.2f, 1.0f, 2.0f}, {1.0f, 1.0f, 1.0f}, {0.2f, 0.2f, 0.2f}, {0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}
+        ));
+        this->m_light.emplace_back("Point", PointLight::Create(
+            {1.2f, 1.0f, 2.0f}, {1.0f, 1.0f, 1.0f}, {0.2f, 0.2f, 0.2f}, {0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}
+        ));
     }
     // Framebuffer.
     {
@@ -128,8 +136,9 @@ void LightLayer::OnImGuiRender() {
     ImGui::Begin("Test for ImGui.");
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_bg_color));
 
-    static int camera_type_idx = (int)Dusk::CameraType::Perspective;
+    static std::size_t camera_type_idx = (std::size_t)Dusk::CameraType::Perspective;
     static std::array<char const*, 2> camera_type{"Orthographic Camera", "Perspective Camera"};
     if (ImGui::BeginCombo("Camera Type", camera_type[camera_type_idx])) {
         for (std::size_t i = 0; i < camera_type.size(); ++i) {
@@ -156,16 +165,31 @@ void LightLayer::OnImGuiRender() {
         }
         ImGui::EndCombo();
     }
-    ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_light->ambient));
-    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light->color));
-    ImGui::DragFloat3("Light Position", glm::value_ptr(this->m_light->position), 0.05f);
+    if (ImGui::BeginCombo("Light Option", this->m_light[this->m_light_idx].first.c_str())) {
+        for (std::size_t i = 0; i < this->m_light.size(); ++i) {
+            bool is_selected = (this->m_light_idx == i);
+            if (ImGui::Selectable(this->m_light[i].first.c_str(), is_selected)) {
+                this->m_light_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light[this->m_light_idx].second->color));
+    if (auto dl = std::dynamic_pointer_cast<DirectionalLight>(this->m_light[this->m_light_idx].second)) {
+        ImGui::DragFloat3("Light Direction", glm::value_ptr(dl->direction), 0.05f);
+    } else if (auto pl = std::dynamic_pointer_cast<PointLight>(this->m_light[this->m_light_idx].second)) {
+        ImGui::DragFloat3("Light Position", glm::value_ptr(pl->position), 0.05f);
+    }
 
     ImGui::End();
 }
 
 void LightLayer::OnUpdate() {
     Dusk::RenderCommand::Clear();
-    Dusk::RenderCommand::SetClearColor({this->m_light->ambient, 1.0f});
+    Dusk::RenderCommand::SetClearColor(this->m_bg_color);
 
     this->m_trackball->OnUpdate();
 
@@ -173,14 +197,20 @@ void LightLayer::OnUpdate() {
 
     auto m = this->m_material[this->m_material_idx].second;
     m->Bind("u_Material");
-    this->m_light->SetShader(m->GetShader());
-    this->m_light->Bind("u_Light");
+    auto l = this->m_light[this->m_light_idx].second;
+    l->SetShader(m->GetShader());
+    l->Bind("u_Light");
     Dusk::Renderer::Submit(m->GetShader().get(), this->m_cube_vao.get(), glm::mat4(1.0f));
 
-    auto model = glm::translate(glm::mat4(1.0f), this->m_light->position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    auto model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    if (auto dl = std::dynamic_pointer_cast<DirectionalLight>(l)) {
+        model = glm::translate(glm::mat4(1.0f), dl->direction) * model;
+    } else if (auto pl = std::dynamic_pointer_cast<PointLight>(l)) {
+        model = glm::translate(glm::mat4(1.0f), pl->position) * model;
+    }
     auto light_shader = this->m_shader_library->Get("Light");
     light_shader->Bind();
-    light_shader->SetVec3("u_LightColor", this->m_light->color);
+    light_shader->SetVec3("u_LightColor", l->color);
     Dusk::Renderer::Submit(light_shader.get(), this->m_light_cube_vao.get(), model);
 
     Dusk::Renderer::EndScene();

@@ -14,9 +14,12 @@ public:
 
 public:
     TextureMaterial(std::shared_ptr<Dusk::Texture2D> diffuse, std::shared_ptr<Dusk::Texture2D> specular, float shininess);
-    TextureMaterial(std::shared_ptr<Dusk::Shader> shader, std::shared_ptr<Dusk::Texture2D> diffuse, std::shared_ptr<Dusk::Texture2D> specular, float shininess);
+    TextureMaterial(std::shared_ptr<Dusk::Texture2D> diffuse, std::shared_ptr<Dusk::Texture2D> specular, float shininess, std::shared_ptr<Dusk::Shader> shader);
 
 public:
+    static std::shared_ptr<TextureMaterial> Create(std::shared_ptr<Dusk::Texture2D> diffuse, std::shared_ptr<Dusk::Texture2D> specular, float shininess);
+    static std::shared_ptr<TextureMaterial> Create(std::shared_ptr<Dusk::Texture2D> diffuse, std::shared_ptr<Dusk::Texture2D> specular, float shininess, std::shared_ptr<Dusk::Shader> shader);
+
     virtual void Bind(std::string const& base_name) const override;
 };
 
