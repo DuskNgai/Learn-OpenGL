@@ -170,37 +170,37 @@ void LightLayer::on_ImGui_render() {
         }
         ImGui::EndCombo();
     }
-    // if (ImGui::BeginCombo("Material Option", this->m_material[this->m_material_idx].first.c_str())) {
-    //     for (std::size_t i{ 0 }; i < this->m_material.size(); ++i) {
-    //         bool is_selected{ (this->m_material_idx == i) };
-    //         if (ImGui::Selectable(this->m_material[i].first.c_str(), is_selected)) {
-    //             this->m_material_idx = i;
-    //         }
-    //         if (is_selected) {
-    //             ImGui::SetItemDefaultFocus();
-    //         }
-    //     }
-    //     ImGui::EndCombo();
-    // }
-    // if (ImGui::BeginCombo("Light Option", this->m_light[this->m_light_idx].first.c_str())) {
-    //     for (std::size_t i{ 0 }; i < this->m_light.size(); ++i) {
-    //         bool is_selected{ (this->m_light_idx == i) };
-    //         if (ImGui::Selectable(this->m_light[i].first.c_str(), is_selected)) {
-    //             this->m_light_idx = i;
-    //         }
-    //         if (is_selected) {
-    //             ImGui::SetItemDefaultFocus();
-    //         }
-    //     }
-    //     ImGui::EndCombo();
-    // }
-    // ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light[this->m_light_idx].second->color));
-    // if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(this->m_light[this->m_light_idx].second) }) {
-    //     ImGui::DragFloat3("Light Direction", glm::value_ptr(dl->direction), 0.05f);
-    // }
-    // else if (auto pl{ std::dynamic_pointer_cast<PointLight>(this->m_light[this->m_light_idx].second) }) {
-    //     ImGui::DragFloat3("Light Position", glm::value_ptr(pl->position), 0.05f);
-    // }
+    if (ImGui::BeginCombo("Material Option", this->m_material[this->m_material_idx].first.c_str())) {
+        for (std::size_t i{ 0 }; i < this->m_material.size(); ++i) {
+            bool is_selected{ (this->m_material_idx == i) };
+            if (ImGui::Selectable(this->m_material[i].first.c_str(), is_selected)) {
+                this->m_material_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    if (ImGui::BeginCombo("Light Option", this->m_light[this->m_light_idx].first.c_str())) {
+        for (std::size_t i{ 0 }; i < this->m_light.size(); ++i) {
+            bool is_selected{ (this->m_light_idx == i) };
+            if (ImGui::Selectable(this->m_light[i].first.c_str(), is_selected)) {
+                this->m_light_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light[this->m_light_idx].second->color));
+    if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(this->m_light[this->m_light_idx].second) }) {
+        ImGui::DragFloat3("Light Direction", glm::value_ptr(dl->direction), 0.05f);
+    }
+    else if (auto pl{ std::dynamic_pointer_cast<PointLight>(this->m_light[this->m_light_idx].second) }) {
+        ImGui::DragFloat3("Light Position", glm::value_ptr(pl->position), 0.05f);
+    }
 
     ImGui::End();
 }
@@ -213,24 +213,24 @@ void LightLayer::on_update() {
 
     dusk::Renderer::begin_scene(this->m_trackball->get_camera());
 
-    // auto m{ this->m_material[this->m_material_idx].second };
-    // m->bind("u_Material");
-    // auto l{ this->m_light[this->m_light_idx].second };
-    // l->set_shader(m->get_shader());
-    // l->bind("u_Light");
-    // dusk::Renderer::submit(m->get_shader().get(), this->m_cube_vao.get(), glm::mat4(1.0f));
+    auto m{ this->m_material[this->m_material_idx].second };
+    m->bind("u_Material");
+    auto l{ this->m_light[this->m_light_idx].second };
+    l->set_shader(m->get_shader());
+    l->bind("u_Light");
+    dusk::Renderer::submit(m->get_shader().get(), this->m_cube_vao.get(), glm::mat4(1.0f));
 
-    // auto model{ glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)) };
-    // if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(l) }) {
-    //     model = glm::translate(glm::mat4(1.0f), dl->direction) * model;
-    // }
-    // else if (auto pl{ std::dynamic_pointer_cast<PointLight>(l) }) {
-    //     model = glm::translate(glm::mat4(1.0f), pl->position) * model;
-    // }
-    // auto light_shader{ this->m_shader_library->get("Light") };
-    // light_shader->bind();
-    // light_shader->set_vec3("u_LightColor", l->color);
-    // dusk::Renderer::submit(light_shader.get(), this->m_light_cube_vao.get(), model);
+    auto model{ glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)) };
+    if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(l) }) {
+        model = glm::translate(glm::mat4(1.0f), dl->direction) * model;
+    }
+    else if (auto pl{ std::dynamic_pointer_cast<PointLight>(l) }) {
+        model = glm::translate(glm::mat4(1.0f), pl->position) * model;
+    }
+    auto light_shader{ this->m_shader_library->get("Light") };
+    light_shader->bind();
+    light_shader->set_vec3("u_LightColor", l->color);
+    dusk::Renderer::submit(light_shader.get(), this->m_light_cube_vao.get(), model);
 
     dusk::Renderer::end_scene();
 }

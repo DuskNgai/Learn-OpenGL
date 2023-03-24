@@ -48,7 +48,7 @@ make -j
     - [x] Colors
     - [x] Basic Lighting
     - [x] Materials
-    - [ ] Lighting Maps
+    - [x] Lighting Maps
     - [ ] Light Casters
     - [ ] Multiple Lights
 - [ ] Advanced OpenGL
