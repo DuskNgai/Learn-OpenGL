@@ -137,7 +137,10 @@ void LightLayer::on_attach() {
     }
     // Framebuffer.
     {
-        dusk::FramebufferProps props{ 1280, 720 };
+        auto window{ dusk::Application::get()->get_window() };
+        dusk::FramebufferProps props{
+            {window->get_width(), window->get_height()}
+        };
         this->m_frame_buffer = dusk::Framebuffer::create(props);
     }
 }
@@ -162,7 +165,6 @@ void LightLayer::on_ImGui_render() {
             bool is_selected{ (camera_type_idx == i) };
             if (ImGui::Selectable(camera_type[i], is_selected)) {
                 camera_type_idx = i;
-                this->m_trackball->set_camera_type((dusk::CameraType)camera_type_idx);
             }
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();
@@ -170,6 +172,8 @@ void LightLayer::on_ImGui_render() {
         }
         ImGui::EndCombo();
     }
+    this->m_trackball->set_camera_type((dusk::CameraType)camera_type_idx);
+
     if (ImGui::BeginCombo("Material Option", this->m_material[this->m_material_idx].first.c_str())) {
         for (std::size_t i{ 0 }; i < this->m_material.size(); ++i) {
             bool is_selected{ (this->m_material_idx == i) };
@@ -182,6 +186,7 @@ void LightLayer::on_ImGui_render() {
         }
         ImGui::EndCombo();
     }
+
     if (ImGui::BeginCombo("Light Option", this->m_light[this->m_light_idx].first.c_str())) {
         for (std::size_t i{ 0 }; i < this->m_light.size(); ++i) {
             bool is_selected{ (this->m_light_idx == i) };

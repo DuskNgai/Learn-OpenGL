@@ -93,7 +93,10 @@ void ExampleLayer::on_attach() {
     }
     // Framebuffer.
     {
-        dusk::FramebufferProps props{ 1280, 720 };
+        auto window{ dusk::Application::get()->get_window() };
+        dusk::FramebufferProps props{
+            {window->get_width(), window->get_height()}
+        };
         this->m_frame_buffer = dusk::Framebuffer::create(props);
     }
 }
@@ -199,16 +202,45 @@ void ExampleLayer::on_ImGui_render() {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_bg_color));
 
-    static int camera_type = (int)dusk::CameraType::Perspective;
-    ImGui::Combo("Camera Type", (int*)&camera_type, "Orthographic Camera\0Perspective Camera\0");
-    this->m_trackball->set_camera_type((dusk::CameraType)camera_type);
-
-    ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->get_color_attachment(), ImVec2(1280, 720));
+    // Set camera.
+    static std::size_t camera_type_idx{ (std::size_t)dusk::CameraType::Perspective };
+    static std::array<char const*, 2> camera_type{ "Orthographic Camera", "Perspective Camera" };
+    if (ImGui::BeginCombo("Camera Type", camera_type[camera_type_idx])) {
+        for (std::size_t i{ 0 }; i < camera_type.size(); ++i) {
+            bool is_selected{ (camera_type_idx == i) };
+            if (ImGui::Selectable(camera_type[i], is_selected)) {
+                camera_type_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    this->m_trackball->set_camera_type((dusk::CameraType)camera_type_idx);
 
     ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 30, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::Begin("Viewport.");
+
+    ImVec2 const viewport_size{ ImGui::GetContentRegionAvail() };
+    if (this->m_viewport_size != glm::vec2{ viewport_size.x, viewport_size.y }) {
+        this->m_viewport_size = { viewport_size.x, viewport_size.y };
+        this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
+    }
+    ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->get_color_attachment(), { this->m_viewport_size.x, this->m_viewport_size.y }, { 0, 1 }, { 1, 0 });
+
+    ImGui::End();
+    ImGui::PopStyleVar(1);
 }
 
 void ExampleLayer::on_update() {
+    dusk::RenderCommand::clear();
+    dusk::RenderCommand::set_clear_color(this->m_bg_color);
+
     this->m_frame_buffer->bind();
     dusk::RenderCommand::clear();
     dusk::RenderCommand::set_clear_color(this->m_bg_color);

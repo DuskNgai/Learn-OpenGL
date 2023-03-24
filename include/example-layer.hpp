@@ -20,6 +20,7 @@ private:
 
     std::unique_ptr<dusk::TrackBall> m_trackball;
 
+    glm::vec2 m_viewport_size{ 0.0f, 0.0f };
     glm::vec4 m_bg_color{ 0.1f, 0.1f, 0.1f, 1.0f };
 
 public:
