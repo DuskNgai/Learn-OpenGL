@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 // clang-format off
-#define LEARN_OPENGL_NAMESPACE_BEGIN namespace LearnGL {
+#define LEARN_OPENGL_NAMESPACE_BEGIN namespace learngl {
 #define LEARN_OPENGL_NAMESPACE_END                     }
 
 LEARN_OPENGL_NAMESPACE_BEGIN

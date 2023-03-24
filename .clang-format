@@ -56,7 +56,7 @@ BreakStringLiterals: false
 ColumnLimit: 0
 CommentPragmas: '^ Comment pragma:'
 CompactNamespaces: false
-Cpp11BracedListStyle: true
+Cpp11BracedListStyle: false
 
 EmptyLineAfterAccessModifier: Leave
 EmptyLineBeforeAccessModifier: Always

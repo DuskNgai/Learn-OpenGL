@@ -1,12 +1,12 @@
 #ifndef _LEARN_OPENGL_SANDBOX_HPP_
 #define _LEARN_OPENGL_SANDBOX_HPP_
 
-#include <Dusk.hpp>
-#include <Common.hpp>
+#include <dusk.hpp>
+#include <common.hpp>
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
-class Sandbox : public Dusk::Application {
+class Sandbox : public dusk::Application {
 public:
     Sandbox() = default;
     ~Sandbox() = default;
