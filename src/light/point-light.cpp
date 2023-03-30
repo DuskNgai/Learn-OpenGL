@@ -2,7 +2,7 @@
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
-PointLight::PointLight(glm::vec3 position, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> shader)
+PointLight::PointLight(glm::vec3 position, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> const& shader)
     : Light{ color, ambient, diffuse, specular, shader }
     , position{ position } {}
 

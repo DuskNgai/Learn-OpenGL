@@ -2,7 +2,7 @@
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
-TextureMaterial::TextureMaterial(std::shared_ptr<dusk::Texture2D> diffuse, std::shared_ptr<dusk::Texture2D> specular, float shininess, std::shared_ptr<dusk::Shader> shader)
+TextureMaterial::TextureMaterial(std::shared_ptr<dusk::Texture2D> diffuse, std::shared_ptr<dusk::Texture2D> specular, float shininess, std::shared_ptr<dusk::Shader> const& shader)
     : Material{ shader }
     , diffuse{ diffuse }
     , specular{ specular }

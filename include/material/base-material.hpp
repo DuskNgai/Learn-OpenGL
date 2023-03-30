@@ -12,13 +12,11 @@ protected:
     std::shared_ptr<dusk::Shader> shader;
 
 public:
-    Material(std::shared_ptr<dusk::Shader> shader = nullptr);
+    Material(std::shared_ptr<dusk::Shader> const& shader = nullptr);
     virtual ~Material() = default;
 
 public:
-    /// @brief Set the shader for the material.
-    void set_shader(std::shared_ptr<dusk::Shader> shader);
-    /// @brief Get the shader of the material.
+    void set_shader(std::shared_ptr<dusk::Shader> const& shader);
     std::shared_ptr<dusk::Shader> get_shader() const;
 
     /// @brief Bind the material to the shader.

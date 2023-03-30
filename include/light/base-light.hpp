@@ -18,13 +18,11 @@ protected:
     std::shared_ptr<dusk::Shader> shader;
 
 public:
-    Light(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> shader = nullptr);
+    Light(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> const& shader = nullptr);
     virtual ~Light() = default;
 
 public:
-    /// @brief Set the shader for the light.
-    void set_shader(std::shared_ptr<dusk::Shader> shader);
-    /// @brief Get the shader of the light.
+    void set_shader(std::shared_ptr<dusk::Shader> const& shader);
     std::shared_ptr<dusk::Shader> get_shader() const;
 
     /// @brief Bind the light to the shader.

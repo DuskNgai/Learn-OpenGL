@@ -13,7 +13,7 @@ public:
     float shininess{ 0.0f };
 
 public:
-    TextureMaterial(std::shared_ptr<dusk::Texture2D> diffuse, std::shared_ptr<dusk::Texture2D> specular, float shininess, std::shared_ptr<dusk::Shader> shader = nullptr);
+    TextureMaterial(std::shared_ptr<dusk::Texture2D> diffuse, std::shared_ptr<dusk::Texture2D> specular, float shininess, std::shared_ptr<dusk::Shader> const& shader = nullptr);
 
 public:
     template <typename... Args>

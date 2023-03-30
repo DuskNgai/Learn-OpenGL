@@ -2,7 +2,7 @@
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
-DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> shader)
+DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> const& shader)
     : Light{ color, ambient, diffuse, specular, shader }
     , direction{ direction } {}
 

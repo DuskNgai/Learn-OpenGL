@@ -2,7 +2,7 @@
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
-PureColorMaterial::PureColorMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<dusk::Shader> shader)
+PureColorMaterial::PureColorMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<dusk::Shader> const& shader)
     : Material{ shader }
     , ambient{ ambient }
     , diffuse{ diffuse }

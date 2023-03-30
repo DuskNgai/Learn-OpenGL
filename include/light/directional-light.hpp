@@ -10,7 +10,7 @@ public:
     glm::vec3 direction{ 0.0f, 0.0f, 0.0f };
 
 public:
-    DirectionalLight(glm::vec3 direction, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> shader = nullptr);
+    DirectionalLight(glm::vec3 direction, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> const& shader = nullptr);
 
 public:
     template <typename... Args>

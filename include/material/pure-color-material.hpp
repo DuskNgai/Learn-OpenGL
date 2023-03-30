@@ -14,7 +14,7 @@ public:
     float shininess{ 0.0f };
 
 public:
-    PureColorMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<dusk::Shader> shader = nullptr);
+    PureColorMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<dusk::Shader> const& shader = nullptr);
 
 public:
     template <typename... Args>

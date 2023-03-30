@@ -16,18 +16,8 @@ cd Learn-OpenGL
 git submodule sync --recursive
 git submodule update --init --recursive
 
-mkdir build
-cd build
-cmake ..
-###### If you are using Visual Studio #####
-# Double click `LearnOpenGL.sln`
-# set `learngl` as starting project
-# make and run.
-###### End if you are using Visual Studio #####
-
-###### If you are using GCC/Clang #####
-make -j
-###### End if you are using GCC/Clang #####
+cmake . -B build
+cmake --build build --config Release -j
 ```
 
 ## Todo List
