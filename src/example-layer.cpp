@@ -224,9 +224,15 @@ void ExampleLayer::on_ImGui_render() {
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 30, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::Begin("Viewport.");
+    ImGui::Begin("Viewport");
 
-    ImVec2 const viewport_size{ ImGui::GetContentRegionAvail() };
+    // Receiving input on focused.
+    this->m_is_viewport_focused = ImGui::IsWindowFocused();
+    this->m_is_viewport_hovered = ImGui::IsWindowHovered();
+    dusk::Application::get()->get_imgui_layer()->set_block_event(not this->m_is_viewport_focused or not this->m_is_viewport_hovered);
+
+    // Resize the viewport.
+    auto viewport_size{ ImGui::GetContentRegionAvail() };
     if (this->m_viewport_size != glm::vec2{ viewport_size.x, viewport_size.y }) {
         this->m_viewport_size = { viewport_size.x, viewport_size.y };
         this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
@@ -245,7 +251,9 @@ void ExampleLayer::on_update() {
     dusk::RenderCommand::clear();
     dusk::RenderCommand::set_clear_color(this->m_bg_color);
 
-    this->m_trackball->on_update();
+    if (this->m_is_viewport_focused) {
+        this->m_trackball->on_update();
+    }
     {
         dusk::Renderer::begin_scene(this->m_trackball->get_camera());
 
@@ -288,7 +296,9 @@ void ExampleLayer::on_update() {
 }
 
 void ExampleLayer::on_event(dusk::EventBase& e) {
-    this->m_trackball->on_event(e);
+    if (this->m_is_viewport_focused) {
+        this->m_trackball->on_event(e);
+    }
 }
 
 LEARN_OPENGL_NAMESPACE_END

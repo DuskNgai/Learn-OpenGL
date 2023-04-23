@@ -16,12 +16,15 @@ private:
     std::shared_ptr<dusk::Texture> m_texture;
     std::shared_ptr<dusk::Texture> m_alpha_texture;
 
-    std::shared_ptr<dusk::Framebuffer> m_frame_buffer;
+    std::unique_ptr<dusk::Framebuffer> m_frame_buffer;
 
     std::unique_ptr<dusk::TrackBall> m_trackball;
 
     glm::vec2 m_viewport_size{ 0.0f, 0.0f };
     glm::vec4 m_bg_color{ 0.1f, 0.1f, 0.1f, 1.0f };
+
+    bool m_is_viewport_focused{ false };
+    bool m_is_viewport_hovered{ false };
 
 public:
     ExampleLayer();

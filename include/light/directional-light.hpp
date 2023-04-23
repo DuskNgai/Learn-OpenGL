@@ -11,6 +11,7 @@ public:
 
 public:
     DirectionalLight(glm::vec3 direction, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> const& shader = nullptr);
+    virtual ~DirectionalLight() = default;
 
 public:
     template <typename... Args>

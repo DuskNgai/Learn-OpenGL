@@ -15,6 +15,7 @@ public:
 
 public:
     PureColorMaterial(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess, std::shared_ptr<dusk::Shader> const& shader = nullptr);
+    virtual ~PureColorMaterial() = default;
 
 public:
     template <typename... Args>

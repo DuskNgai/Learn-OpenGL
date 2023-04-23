@@ -47,7 +47,7 @@ def count_lines(path: str) -> tuple[int, int]:
 
 def main():
     if len(sys.argv) != 2:
-        print('Usage: python LineCounter.py <path>')
+        print("Usage: python {} <path>".format(sys.argv[0]))
         return
     print("Number of files {}, number of lines {}.".format(*count_lines(sys.argv[1])))
 

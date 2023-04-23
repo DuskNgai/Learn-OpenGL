@@ -14,6 +14,7 @@ public:
 
 public:
     TextureMaterial(std::shared_ptr<dusk::Texture2D> diffuse, std::shared_ptr<dusk::Texture2D> specular, float shininess, std::shared_ptr<dusk::Shader> const& shader = nullptr);
+    virtual ~TextureMaterial() = default;
 
 public:
     template <typename... Args>

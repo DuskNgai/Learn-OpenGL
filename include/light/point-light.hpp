@@ -11,6 +11,7 @@ public:
 
 public:
     PointLight(glm::vec3 position, glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, std::shared_ptr<dusk::Shader> const& shader = nullptr);
+    virtual ~PointLight() = default;
 
 public:
     template <typename... Args>
