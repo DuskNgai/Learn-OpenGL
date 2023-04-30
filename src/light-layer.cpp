@@ -1,6 +1,7 @@
 #include <imgui/imgui.h>
 
 #include <light-layer.hpp>
+#include <simple-shapes.hpp>
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
@@ -12,66 +13,22 @@ void LightLayer::on_attach() {
     this->m_trackball = std::make_unique<dusk::TrackBall>(dusk::Camera::create(dusk::CameraType::Perspective));
     // Cube.
     {
-        // clang-format off
-        float vertices[] {
-            // Position(3), Normal(3), TexCoord(2)
-            // Back
-            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-             1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-            // Front
-            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-             1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-            // Left
-            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-            -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-            // Right
-             1.0f,  1.0f,  1.0f,  1.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-             1.0f,  1.0f, -1.0f,  1.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f,  1.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-             1.0f, -1.0f,  1.0f,  1.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-            // Bottom
-            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-             1.0f, -1.0f, -1.0f,  0.0f, -1.0f, -1.0f, 1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f,  0.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f,  1.0f,  0.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-            // Top
-            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-             1.0f,  1.0f, -1.0f,  0.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f,  0.0f,  1.0f, -1.0f, 1.0f, 0.0f,
-            -1.0f,  1.0f,  1.0f,  0.0f,  1.0f, -1.0f, 0.0f, 0.0f,
-        };
-        uint32_t indices[] {
-             0,  1,  2,  0,  2,  3,
-             4,  5,  6,  4,  6,  7,
-             8,  9, 10,  8, 10, 11,
-            12, 13, 14, 12, 14, 15,
-            16, 17, 18, 16, 18, 19,
-            20, 21, 22, 20, 22, 23
-        };
-        // clang-format on
+        this->m_vao.emplace("cube", dusk::VertexArray::create());
 
-        this->m_cube_vao = dusk::VertexArray::create();
-
-        auto vertex_buffer{ dusk::VertexBuffer::create(sizeof(vertices), vertices) };
+        auto vertex_buffer{ dusk::VertexBuffer::create(sizeof(CUBE_VERTICES), CUBE_VERTICES.data()) };
         vertex_buffer->set_layout(dusk::BufferLayout({
             {dusk::ShaderDataType::Vec3, "a_Position"},
             {dusk::ShaderDataType::Vec3,   "a_Normal"},
             {dusk::ShaderDataType::Vec2, "a_TexCoord"}
         }));
-        this->m_cube_vao->add_vertex_buffer(vertex_buffer);
+        this->m_vao["cube"]->add_vertex_buffer(vertex_buffer);
 
-        auto index_buffer{ dusk::IndexBuffer::create(sizeof(indices) / sizeof(uint32_t), indices) };
-        this->m_cube_vao->set_index_buffer(index_buffer);
+        auto index_buffer{ dusk::IndexBuffer::create(sizeof(CUBE_INDICES), CUBE_INDICES.data()) };
+        this->m_vao["cube"]->set_index_buffer(index_buffer);
 
-        this->m_light_cube_vao = dusk::VertexArray::create();
-        this->m_light_cube_vao->add_vertex_buffer(vertex_buffer);
-        this->m_light_cube_vao->set_index_buffer(index_buffer);
+        this->m_vao.emplace("light", dusk::VertexArray::create());
+        this->m_vao["light"]->add_vertex_buffer(vertex_buffer);
+        this->m_vao["light"]->set_index_buffer(index_buffer);
     }
     // A shader library for managing shaders.
     {
@@ -161,7 +118,7 @@ void LightLayer::on_ImGui_render() {
     static std::size_t camera_type_idx{ (std::size_t)dusk::CameraType::Perspective };
     static std::array<char const*, 2> camera_type{ "Orthographic Camera", "Perspective Camera" };
     if (ImGui::BeginCombo("Camera Type", camera_type[camera_type_idx])) {
-        for (std::size_t i{ 0 }; i < camera_type.size(); ++i) {
+        for (auto i : dusk::range(camera_type.size())) {
             bool is_selected{ (camera_type_idx == i) };
             if (ImGui::Selectable(camera_type[i], is_selected)) {
                 camera_type_idx = i;
@@ -175,7 +132,7 @@ void LightLayer::on_ImGui_render() {
     this->m_trackball->set_camera_type((dusk::CameraType)camera_type_idx);
 
     if (ImGui::BeginCombo("Material Option", this->m_material[this->m_material_idx].first.c_str())) {
-        for (std::size_t i{ 0 }; i < this->m_material.size(); ++i) {
+        for (auto i : dusk::range(this->m_material.size())) {
             bool is_selected{ (this->m_material_idx == i) };
             if (ImGui::Selectable(this->m_material[i].first.c_str(), is_selected)) {
                 this->m_material_idx = i;
@@ -188,7 +145,7 @@ void LightLayer::on_ImGui_render() {
     }
 
     if (ImGui::BeginCombo("Light Option", this->m_light[this->m_light_idx].first.c_str())) {
-        for (std::size_t i{ 0 }; i < this->m_light.size(); ++i) {
+        for (auto i : dusk::range(this->m_light.size())) {
             bool is_selected{ (this->m_light_idx == i) };
             if (ImGui::Selectable(this->m_light[i].first.c_str(), is_selected)) {
                 this->m_light_idx = i;
@@ -223,7 +180,7 @@ void LightLayer::on_update() {
     auto l{ this->m_light[this->m_light_idx].second };
     l->set_shader(m->get_shader());
     l->bind("u_Light");
-    dusk::Renderer::submit(m->get_shader().get(), this->m_cube_vao.get(), glm::mat4(1.0f));
+    dusk::Renderer::submit(m->get_shader(), this->m_vao["cube"], glm::mat4(1.0f));
 
     auto model{ glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)) };
     if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(l) }) {
@@ -235,7 +192,7 @@ void LightLayer::on_update() {
     auto light_shader{ this->m_shader_library->get("Light") };
     light_shader->bind();
     light_shader->set_vec3("u_LightColor", l->color);
-    dusk::Renderer::submit(light_shader.get(), this->m_light_cube_vao.get(), model);
+    dusk::Renderer::submit(light_shader, this->m_vao["light"], model);
 
     dusk::Renderer::end_scene();
 }

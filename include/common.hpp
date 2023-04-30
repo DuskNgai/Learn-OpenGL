@@ -1,5 +1,5 @@
-#ifndef _LEARN_OPENGL_COMMON_CUH_
-#define _LEARN_OPENGL_COMMON_CUH_
+#ifndef _LEARN_OPENGL_COMMON_HPP_
+#define _LEARN_OPENGL_COMMON_HPP_
 
 #include <iostream>
 #include <memory>
@@ -27,4 +27,4 @@ template<typename T> T constexpr SQRT_3      = 1.73205080756887729353l;
 LEARN_OPENGL_NAMESPACE_END
 // clang-format on
 
-#endif // !_LEARN_OPENGL_COMMON_CUH_
+#endif // !_LEARN_OPENGL_COMMON_HPP_

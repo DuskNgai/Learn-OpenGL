@@ -1,6 +1,7 @@
 #include <imgui/imgui.h>
 
 #include <example-layer.hpp>
+#include <simple-shapes.hpp>
 
 LEARN_OPENGL_NAMESPACE_BEGIN
 
@@ -14,27 +15,16 @@ void ExampleLayer::on_attach() {
     this->m_trackball = std::make_unique<dusk::TrackBall>(dusk::Camera::create(dusk::CameraType::Perspective));
     // Tetrahedron.
     {
-        // clang-format off
-        float vertices[] = {
-            // Position(3), Color(4)
-             1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        };
-        uint32_t indices[] = {0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3};
-        // clang-format on
-
-        this->m_vertex_array = dusk::VertexArray::create();
-        auto vertex_buffer{ dusk::VertexBuffer::create(sizeof(vertices), vertices) };
+        this->m_vertex_array.emplace("tetrahedron", dusk::VertexArray::create());
+        auto vertex_buffer{ dusk::VertexBuffer::create(sizeof(TETRAHEDRON_VERTICES), TETRAHEDRON_VERTICES.data()) };
         vertex_buffer->set_layout(dusk::BufferLayout({
             {dusk::ShaderDataType::Vec3, "a_Position"},
             {dusk::ShaderDataType::Vec4,    "a_Color"}
         }));
-        this->m_vertex_array->add_vertex_buffer(vertex_buffer);
+        this->m_vertex_array["tetrahedron"]->add_vertex_buffer(vertex_buffer);
 
-        auto index_buffer{ dusk::IndexBuffer::create(sizeof(indices) / sizeof(uint32_t), indices) };
-        this->m_vertex_array->set_index_buffer(index_buffer);
+        auto index_buffer{ dusk::IndexBuffer::create(sizeof(TETRAHEDRON_INDICES), TETRAHEDRON_INDICES.data()) };
+        this->m_vertex_array["tetrahedron"]->set_index_buffer(index_buffer);
 
         // Shader for tetrahedron.
         this->m_shader_library->add(
@@ -47,19 +37,8 @@ void ExampleLayer::on_attach() {
     }
     // UV map.
     {
-        // clang-format off
-        float uv_vertices[] {
-            // Position(3), Color(4), TexCoord(2), TexIndex(1), TilingScale(1)
-            -1.0f, -1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f,  1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-             1.0f,  1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-             1.0f, -1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        };
-        uint32_t uv_indices[] {0, 1, 2, 0, 2, 3};
-        // clang-format on
-
-        this->m_texture_vertex_array = dusk::VertexArray::create();
-        auto vertex_buffer{ dusk::VertexBuffer::create(sizeof(uv_vertices), uv_vertices) };
+        this->m_vertex_array.emplace("texture", dusk::VertexArray::create());
+        auto vertex_buffer{ dusk::VertexBuffer::create(sizeof(UV_VERTICES), UV_VERTICES.data()) };
         vertex_buffer->set_layout(dusk::BufferLayout({
             { dusk::ShaderDataType::Vec3,    "a_Position"},
             { dusk::ShaderDataType::Vec4,       "a_Color"},
@@ -67,10 +46,10 @@ void ExampleLayer::on_attach() {
             {dusk::ShaderDataType::Float,    "a_TexIndex"},
             {dusk::ShaderDataType::Float, "a_TilingScale"}
         }));
-        this->m_texture_vertex_array->add_vertex_buffer(vertex_buffer);
+        this->m_vertex_array["texture"]->add_vertex_buffer(vertex_buffer);
 
-        auto index_buffer{ dusk::IndexBuffer::create(sizeof(uv_indices) / sizeof(uint32_t), uv_indices) };
-        this->m_texture_vertex_array->set_index_buffer(index_buffer);
+        auto index_buffer{ dusk::IndexBuffer::create(sizeof(UV_INDICES), UV_INDICES.data()) };
+        this->m_vertex_array["texture"]->set_index_buffer(index_buffer);
 
         // Shader for texture quad.
         this->m_shader_library->add(
@@ -84,12 +63,12 @@ void ExampleLayer::on_attach() {
         this->m_shader_library->get("Texture")->bind();
         this->m_shader_library->get("Texture")->set_vec4("u_Color", { 1.0f, 1.0f, 1.0f, 1.0f });
         auto sampler{ dusk::IntegerSequenceToArray(std::make_integer_sequence<int, 32>{}) };
-        this->m_shader_library->get("Texture")->set_int_array("u_Textures", sampler.data(), 32);
+        this->m_shader_library->get("Texture")->set_int_array("u_Textures", sampler.data(), sampler.size());
     }
     // Texture.
     {
-        this->m_texture = dusk::Texture2D::create(dusk::get_file_path("assets/images/cornell.png"));
-        this->m_alpha_texture = dusk::Texture2D::create(dusk::get_file_path("assets/images/hexagram.png"));
+        this->m_texture.emplace("cornell", dusk::Texture2D::create(dusk::get_file_path("assets/images/cornell.png")));
+        this->m_texture.emplace("alpha", dusk::Texture2D::create(dusk::get_file_path("assets/images/hexagram.png")));
     }
     // Framebuffer.
     {
@@ -206,7 +185,7 @@ void ExampleLayer::on_ImGui_render() {
     static std::size_t camera_type_idx{ (std::size_t)dusk::CameraType::Perspective };
     static std::array<char const*, 2> camera_type{ "Orthographic Camera", "Perspective Camera" };
     if (ImGui::BeginCombo("Camera Type", camera_type[camera_type_idx])) {
-        for (std::size_t i{ 0 }; i < camera_type.size(); ++i) {
+        for (auto i : dusk::range(camera_type.size())) {
             bool is_selected{ (camera_type_idx == i) };
             if (ImGui::Selectable(camera_type[i], is_selected)) {
                 camera_type_idx = i;
@@ -229,7 +208,7 @@ void ExampleLayer::on_ImGui_render() {
     // Receiving input on focused.
     this->m_is_viewport_focused = ImGui::IsWindowFocused();
     this->m_is_viewport_hovered = ImGui::IsWindowHovered();
-    dusk::Application::get()->get_imgui_layer()->set_block_event(not this->m_is_viewport_focused or not this->m_is_viewport_hovered);
+    dusk::Application::get()->get_imgui_layer()->set_block_event(not(this->m_is_viewport_focused and this->m_is_viewport_hovered));
 
     // Resize the viewport.
     auto viewport_size{ ImGui::GetContentRegionAvail() };
@@ -262,14 +241,14 @@ void ExampleLayer::on_update() {
             for (int x{ -1 }; x <= 1; ++x) {
                 glm::vec3 translate{ 1.0f * x, 1.0f * y, 0.0f };
                 glm::mat4 model{ glm::translate(glm::mat4(1.0), translate) * scale };
-                dusk::Renderer::submit(this->m_shader_library->get("First").get(), this->m_vertex_array.get(), model);
+                dusk::Renderer::submit(this->m_shader_library->get("First"), this->m_vertex_array["tetrahedron"], model);
             }
         }
 
-        this->m_texture->bind(0);
-        dusk::Renderer::submit(this->m_shader_library->get("Texture").get(), this->m_texture_vertex_array.get(), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-        this->m_alpha_texture->bind(0);
-        dusk::Renderer::submit(this->m_shader_library->get("Texture").get(), this->m_texture_vertex_array.get(), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        this->m_texture["cornell"]->bind(0);
+        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        this->m_texture["alpha"]->bind(0);
+        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
         dusk::Renderer::end_scene();
     }
@@ -285,10 +264,10 @@ void ExampleLayer::on_update() {
         dusk::Renderer2D::draw_rotated_quad({ -1.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), { 0.5f, 1.0f, 0.5f, 1.0f });
         dusk::Renderer2D::draw_rotated_quad({ 1.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), { 0.5f, 0.5f, 1.0f, 1.0f });
         // Texture.
-        dusk::Renderer2D::draw_quad({ 0.0f, 1.0f }, { 1.0f, 1.0f }, this->m_texture);
-        dusk::Renderer2D::draw_rotated_quad({ 0.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_texture);
-        dusk::Renderer2D::draw_quad({ 1.0f, 0.0f }, { 1.0f, 1.0f }, this->m_alpha_texture);
-        dusk::Renderer2D::draw_rotated_quad({ -1.0f, 0.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_alpha_texture);
+        dusk::Renderer2D::draw_quad({ 0.0f, 1.0f }, { 1.0f, 1.0f }, this->m_texture["cornell"]);
+        dusk::Renderer2D::draw_rotated_quad({ 0.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_texture["cornell"]);
+        dusk::Renderer2D::draw_quad({ 1.0f, 0.0f }, { 1.0f, 1.0f }, this->m_texture["alpha"]);
+        dusk::Renderer2D::draw_rotated_quad({ -1.0f, 0.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_texture["alpha"]);
 
         dusk::Renderer2D::end_scene();
     }

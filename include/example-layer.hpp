@@ -10,11 +10,9 @@ class ExampleLayer : public dusk::Layer {
 private:
     std::unique_ptr<dusk::ShaderLibrary> m_shader_library;
 
-    std::unique_ptr<dusk::VertexArray> m_vertex_array;
-    std::unique_ptr<dusk::VertexArray> m_texture_vertex_array;
+    std::unordered_map<std::string, std::unique_ptr<dusk::VertexArray>> m_vertex_array;
 
-    std::shared_ptr<dusk::Texture> m_texture;
-    std::shared_ptr<dusk::Texture> m_alpha_texture;
+    std::unordered_map<std::string, std::shared_ptr<dusk::Texture>> m_texture;
 
     std::unique_ptr<dusk::Framebuffer> m_frame_buffer;
 

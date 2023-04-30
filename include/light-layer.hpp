@@ -10,10 +10,9 @@ LEARN_OPENGL_NAMESPACE_BEGIN
 
 class LightLayer : public dusk::Layer {
 private:
-    std::unique_ptr<dusk::VertexArray> m_cube_vao;
-    std::unique_ptr<dusk::VertexArray> m_light_cube_vao;
-    std::unique_ptr<dusk::TrackBall> m_trackball;
     std::unique_ptr<dusk::ShaderLibrary> m_shader_library;
+    std::unordered_map<std::string, std::unique_ptr<dusk::VertexArray>> m_vao;
+    std::unique_ptr<dusk::TrackBall> m_trackball;
     std::unique_ptr<dusk::Framebuffer> m_frame_buffer;
 
     glm::vec4 m_bg_color{ 0.1f, 0.1f, 0.1f, 1.0f };
