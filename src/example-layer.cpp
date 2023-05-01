@@ -9,8 +9,6 @@ ExampleLayer::ExampleLayer()
     : Layer{ "ExampleLayer" } {}
 
 void ExampleLayer::on_attach() {
-    // A shader library for managing shaders.
-    this->m_shader_library = std::make_unique<dusk::ShaderLibrary>();
     // Camera track ball.
     this->m_trackball = std::make_unique<dusk::TrackBall>(dusk::Camera::create(dusk::CameraType::Perspective));
     // Tetrahedron.
@@ -25,15 +23,6 @@ void ExampleLayer::on_attach() {
 
         auto index_buffer{ dusk::IndexBuffer::create(sizeof(TETRAHEDRON_INDICES), TETRAHEDRON_INDICES.data()) };
         this->m_vertex_array["tetrahedron"]->set_index_buffer(index_buffer);
-
-        // Shader for tetrahedron.
-        this->m_shader_library->add(
-            "First",
-            dusk::Shader::create(
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/FirstVertexShader.glsl")),
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/FirstFragmentShader.glsl"))
-            )
-        );
     }
     // UV map.
     {
@@ -50,25 +39,36 @@ void ExampleLayer::on_attach() {
 
         auto index_buffer{ dusk::IndexBuffer::create(sizeof(UV_INDICES), UV_INDICES.data()) };
         this->m_vertex_array["texture"]->set_index_buffer(index_buffer);
-
+    }
+    // A shader library for managing shaders.
+    {
+        this->m_shader_library = std::make_unique<dusk::ShaderLibrary>();
+        // Shader for tetrahedron.
+        this->m_shader_library->emplace(
+            "First",
+            dusk::Shader::create(
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/FirstVS.glsl")),
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/FirstFS.glsl"))
+            )
+        );
         // Shader for texture quad.
-        this->m_shader_library->add(
+        this->m_shader_library->emplace(
             "Texture",
             dusk::Shader::create(
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/TextureVertexShader.glsl")),
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/TextureFragmentShader.glsl"))
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/TextureVS.glsl")),
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/TextureFS.glsl"))
             )
         );
         // Bindings uniform variable to shader.
+        auto sampler{ dusk::IntegerSequenceToArray(std::make_integer_sequence<int, 32>{}) };
         this->m_shader_library->get("Texture")->bind();
         this->m_shader_library->get("Texture")->set_vec4("u_Color", { 1.0f, 1.0f, 1.0f, 1.0f });
-        auto sampler{ dusk::IntegerSequenceToArray(std::make_integer_sequence<int, 32>{}) };
         this->m_shader_library->get("Texture")->set_int_array("u_Textures", sampler.data(), sampler.size());
     }
     // Texture.
     {
-        this->m_texture.emplace("cornell", dusk::Texture2D::create(dusk::get_file_path("assets/images/cornell.png")));
-        this->m_texture.emplace("alpha", dusk::Texture2D::create(dusk::get_file_path("assets/images/hexagram.png")));
+        this->m_texture.emplace("awesomeface", dusk::Texture2D::create(dusk::get_file_path("assets/images/awesomeface.png")));
+        this->m_texture.emplace("alpha", dusk::Texture2D::create(dusk::get_file_path("assets/images/blending_transparent_window.png")));
     }
     // Framebuffer.
     {
@@ -240,15 +240,15 @@ void ExampleLayer::on_update() {
         for (int y{ -1 }; y <= 1; ++y) {
             for (int x{ -1 }; x <= 1; ++x) {
                 glm::vec3 translate{ 1.0f * x, 1.0f * y, 0.0f };
-                glm::mat4 model{ glm::translate(glm::mat4(1.0), translate) * scale };
+                glm::mat4 model{ glm::translate(glm::mat4(1.0f), translate) * scale };
                 dusk::Renderer::submit(this->m_shader_library->get("First"), this->m_vertex_array["tetrahedron"], model);
             }
         }
 
-        this->m_texture["cornell"]->bind(0);
-        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        this->m_texture["awesomeface"]->bind(0);
+        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.5f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
         this->m_texture["alpha"]->bind(0);
-        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.5f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
         dusk::Renderer::end_scene();
     }
@@ -264,8 +264,8 @@ void ExampleLayer::on_update() {
         dusk::Renderer2D::draw_rotated_quad({ -1.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), { 0.5f, 1.0f, 0.5f, 1.0f });
         dusk::Renderer2D::draw_rotated_quad({ 1.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), { 0.5f, 0.5f, 1.0f, 1.0f });
         // Texture.
-        dusk::Renderer2D::draw_quad({ 0.0f, 1.0f }, { 1.0f, 1.0f }, this->m_texture["cornell"]);
-        dusk::Renderer2D::draw_rotated_quad({ 0.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_texture["cornell"]);
+        dusk::Renderer2D::draw_quad({ 0.0f, 1.0f }, { 1.0f, 1.0f }, this->m_texture["awesomeface"]);
+        dusk::Renderer2D::draw_rotated_quad({ 0.0f, -1.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_texture["awesomeface"]);
         dusk::Renderer2D::draw_quad({ 1.0f, 0.0f }, { 1.0f, 1.0f }, this->m_texture["alpha"]);
         dusk::Renderer2D::draw_rotated_quad({ -1.0f, 0.0f }, { 1.0f, 1.0f }, glm::radians(rotation), this->m_texture["alpha"]);
 

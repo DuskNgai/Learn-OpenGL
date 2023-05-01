@@ -13,13 +13,10 @@ private:
     std::unique_ptr<dusk::ShaderLibrary> m_shader_library;
     std::unordered_map<std::string, std::unique_ptr<dusk::VertexArray>> m_vao;
     std::unique_ptr<dusk::TrackBall> m_trackball;
-    std::unique_ptr<dusk::Framebuffer> m_frame_buffer;
 
     glm::vec4 m_bg_color{ 0.1f, 0.1f, 0.1f, 1.0f };
-    std::size_t m_material_idx{ 0 };
-    std::vector<std::pair<std::string, std::shared_ptr<Material>>> m_material;
-    std::size_t m_light_idx{ 0 };
-    std::vector<std::pair<std::string, std::shared_ptr<Light>>> m_light;
+    dusk::IndexedMap<std::string, std::shared_ptr<Material>> m_material;
+    dusk::IndexedMap<std::string, std::shared_ptr<Light>> m_light;
 
 public:
     LightLayer();

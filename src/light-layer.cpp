@@ -33,25 +33,25 @@ void LightLayer::on_attach() {
     // A shader library for managing shaders.
     {
         this->m_shader_library = std::make_unique<dusk::ShaderLibrary>();
-        this->m_shader_library->add(
+        this->m_shader_library->emplace(
             "PureColor",
             dusk::Shader::create(
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVertexShader.glsl")),
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/PureColorFragmentShader.glsl"))
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVS.glsl")),
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/PureColorFS.glsl"))
             )
         );
-        this->m_shader_library->add(
+        this->m_shader_library->emplace(
             "Texture",
             dusk::Shader::create(
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVertexShader.glsl")),
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/TextureFragmentShader.glsl"))
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVS.glsl")),
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/TextureFS.glsl"))
             )
         );
-        this->m_shader_library->add(
+        this->m_shader_library->emplace(
             "Light",
             dusk::Shader::create(
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVertexShader.glsl")),
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/LightFragmentShader.glsl"))
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVS.glsl")),
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/LightFS.glsl"))
             )
         );
     }
@@ -87,18 +87,10 @@ void LightLayer::on_attach() {
         for (auto&& [name, material] : this->m_material) {
             material->set_shader(this->m_shader_library->get("PureColor"));
         }
-        this->m_material.emplace_back("Texture", TextureMaterial::create(dusk::Texture2D::create(dusk::get_file_path("assets/images/container2.png")), dusk::Texture2D::create(dusk::get_file_path("assets/images/container2_specular.png")), 64.0f, this->m_shader_library->get("Texture")));
+        this->m_material.emplace("Texture", TextureMaterial::create(dusk::Texture2D::create(dusk::get_file_path("assets/images/container2.png")), dusk::Texture2D::create(dusk::get_file_path("assets/images/container2_specular.png")), 64.0f, this->m_shader_library->get("Texture")));
 
-        this->m_light.emplace_back("Directional", DirectionalLight::create(glm::vec3{ 1.2f, 1.0f, 2.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, glm::vec3{ 0.2f, 0.2f, 0.2f }, glm::vec3{ 0.5f, 0.5f, 0.5f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
-        this->m_light.emplace_back("Point", PointLight::create(glm::vec3{ 1.2f, 1.0f, 2.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, glm::vec3{ 0.2f, 0.2f, 0.2f }, glm::vec3{ 0.5f, 0.5f, 0.5f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
-    }
-    // Framebuffer.
-    {
-        auto window{ dusk::Application::get()->get_window() };
-        dusk::FramebufferProps props{
-            {window->get_width(), window->get_height()}
-        };
-        this->m_frame_buffer = dusk::Framebuffer::create(props);
+        this->m_light.emplace("Directional", DirectionalLight::create(glm::vec3{ 1.2f, 1.0f, 2.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, glm::vec3{ 0.2f, 0.2f, 0.2f }, glm::vec3{ 0.5f, 0.5f, 0.5f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
+        this->m_light.emplace("Point", PointLight::create(glm::vec3{ 1.2f, 1.0f, 2.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, glm::vec3{ 0.2f, 0.2f, 0.2f }, glm::vec3{ 0.5f, 0.5f, 0.5f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
     }
 }
 
@@ -131,11 +123,11 @@ void LightLayer::on_ImGui_render() {
     }
     this->m_trackball->set_camera_type((dusk::CameraType)camera_type_idx);
 
-    if (ImGui::BeginCombo("Material Option", this->m_material[this->m_material_idx].first.c_str())) {
+    if (ImGui::BeginCombo("Material Option", this->m_material.get_selected().first.c_str())) {
         for (auto i : dusk::range(this->m_material.size())) {
-            bool is_selected{ (this->m_material_idx == i) };
-            if (ImGui::Selectable(this->m_material[i].first.c_str(), is_selected)) {
-                this->m_material_idx = i;
+            bool is_selected{ (this->m_material.get_selected_index() == i) };
+            if (ImGui::Selectable(this->m_material.get(i).first.c_str(), is_selected)) {
+                this->m_material.set_selected_index(i);
             }
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();
@@ -144,11 +136,11 @@ void LightLayer::on_ImGui_render() {
         ImGui::EndCombo();
     }
 
-    if (ImGui::BeginCombo("Light Option", this->m_light[this->m_light_idx].first.c_str())) {
+    if (ImGui::BeginCombo("Light Option", this->m_light.get_selected().first.c_str())) {
         for (auto i : dusk::range(this->m_light.size())) {
-            bool is_selected{ (this->m_light_idx == i) };
-            if (ImGui::Selectable(this->m_light[i].first.c_str(), is_selected)) {
-                this->m_light_idx = i;
+            bool is_selected{ (this->m_light.get_selected_index() == i) };
+            if (ImGui::Selectable(this->m_light.get(i).first.c_str(), is_selected)) {
+                this->m_light.set_selected_index(i);
             }
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();
@@ -156,11 +148,11 @@ void LightLayer::on_ImGui_render() {
         }
         ImGui::EndCombo();
     }
-    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light[this->m_light_idx].second->color));
-    if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(this->m_light[this->m_light_idx].second) }) {
+    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light.get_selected().second->color));
+    if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(this->m_light.get_selected().second) }) {
         ImGui::DragFloat3("Light Direction", glm::value_ptr(dl->direction), 0.05f);
     }
-    else if (auto pl{ std::dynamic_pointer_cast<PointLight>(this->m_light[this->m_light_idx].second) }) {
+    else if (auto pl{ std::dynamic_pointer_cast<PointLight>(this->m_light.get_selected().second) }) {
         ImGui::DragFloat3("Light Position", glm::value_ptr(pl->position), 0.05f);
     }
 
@@ -175,9 +167,9 @@ void LightLayer::on_update() {
 
     dusk::Renderer::begin_scene(this->m_trackball->get_camera());
 
-    auto m{ this->m_material[this->m_material_idx].second };
+    auto m{ this->m_material.get_selected().second };
     m->bind("u_Material");
-    auto l{ this->m_light[this->m_light_idx].second };
+    auto l{ this->m_light.get_selected().second };
     l->set_shader(m->get_shader());
     l->bind("u_Light");
     dusk::Renderer::submit(m->get_shader(), this->m_vao["cube"], glm::mat4(1.0f));

@@ -16,8 +16,8 @@ cd Learn-OpenGL
 git submodule sync --recursive
 git submodule update --init --recursive
 
-cmake . -B build
-cmake --build build --config Release -j
+cmake -B ./build
+cmake --build ./build --config Release -j
 ```
 
 ## Todo List
@@ -42,7 +42,7 @@ cmake --build build --config Release -j
     - [ ] Light Casters
     - [ ] Multiple Lights
 - [ ] Advanced OpenGL
-    - [ ] Depth Testing
+    - [x] Depth Testing
     - [ ] Stencil Testing
-    - [ ] Blending
+    - [x] Blending
     - [ ] Framebuffers

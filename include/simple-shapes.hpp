@@ -50,6 +50,18 @@ constexpr std::array<uint32_t, 36> CUBE_INDICES {
     20, 21, 22, 20, 22, 23,
 };
 
+constexpr std::array<float, 32> PLANE_VERTICES {
+    // Position(3), Normal(3), TexCoord(2)
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+     1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+     1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+};
+constexpr std::array<uint32_t, 6> PLANE_INDICES {
+    0, 1, 2,
+    0, 2, 3,
+};
+
 constexpr std::array<float, 28> TETRAHEDRON_VERTICES {
     // Position(3), Color(4)
      1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
@@ -66,10 +78,10 @@ constexpr std::array<uint32_t, 12> TETRAHEDRON_INDICES {
 
 constexpr std::array<float, 44> UV_VERTICES {
     // Position(3), Color(4), TexCoord(2), TexIndex(1), TilingScale(1)
-    -1.0f, -1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    -1.0f,  1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-     1.0f,  1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-     1.0f, -1.0f, -1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+    -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+    -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+     1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+     1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 };
 constexpr std::array<uint32_t, 6> UV_INDICES {
     0, 1, 2,
