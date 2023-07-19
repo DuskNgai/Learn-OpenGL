@@ -1,4 +1,4 @@
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 #include <advanced-layer.hpp>
 #include <simple-shapes.hpp>

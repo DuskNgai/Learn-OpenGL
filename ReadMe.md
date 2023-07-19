@@ -45,4 +45,4 @@ cmake --build ./build --config Release -j
     - [x] Depth Testing
     - [ ] Stencil Testing
     - [x] Blending
-    - [ ] Framebuffers
+    - [x] Framebuffers
