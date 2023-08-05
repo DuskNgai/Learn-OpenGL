@@ -1,5 +1,3 @@
-#include <string_view>
-
 #include <imgui.h>
 
 #include <example-layer.hpp>
@@ -11,8 +9,6 @@ ExampleLayer::ExampleLayer()
     : Layer{ "ExampleLayer" } {}
 
 void ExampleLayer::on_attach() {
-    using namespace std::literals::string_view_literals;
-
     // Camera track ball.
     this->m_trackball = std::make_unique<dusk::TrackBall>(dusk::Camera::create(dusk::CameraType::Perspective));
     // Tetrahedron.
@@ -66,8 +62,7 @@ void ExampleLayer::on_attach() {
         // Bindings uniform variable to shader.
         auto sampler{ dusk::IntegerSequenceToArray(std::make_integer_sequence<int, 32>{}) };
         this->m_shader_library->get("Texture")->bind();
-        this->m_shader_library->get("Texture")->set_vec4("u_Color"sv, { 1.0f, 1.0f, 1.0f, 1.0f });
-        this->m_shader_library->get("Texture")->set_int_array("u_Textures"sv, sampler.data(), sampler.size());
+        this->m_shader_library->get("Texture")->set_int_array("u_Textures", sampler.data(), sampler.size());
     }
     // Texture.
     {
@@ -79,16 +74,7 @@ void ExampleLayer::on_attach() {
         auto window{ dusk::Application::get()->get_window() };
         auto width{ window->get_width() };
         auto height{ window->get_height() };
-        // dusk::FramebufferProps props{
-        //     {window->get_width(), window->get_height()}
-        // };
-        // this->m_frame_buffer = dusk::Framebuffer::create(props);
-        this->m_frame_buffer = dusk::Framebuffer::create();
-        auto color_attachment {dusk::Texture2D::create(width, height)};
-        auto depth_stencil_attachment {dusk::Texture2D::create(width, height, dusk::TextureInternalFormat::RGBA, dusk::TextureFormat::RGBA, dusk::TextureDataType::UnsignedByte)};
-        this->m_frame_buffer->attach_texture(color_attachment);
-        this->m_frame_buffer->register_attachment(dusk::AttachmentType::DepthStencil, depth_stencil_attachment->get_texture_id());
-        DUSK_ASSERT(this->m_frame_buffer->status(), "Framebuffer is incomplete!");
+        this->m_frame_buffer = dusk::Framebuffer::create(width, height);
     }
 }
 
@@ -224,10 +210,10 @@ void ExampleLayer::on_ImGui_render() {
 
     // Resize the viewport.
     auto viewport_size{ ImGui::GetContentRegionAvail() };
-    // if (this->m_viewport_size != glm::vec2{ viewport_size.x, viewport_size.y }) {
-    //     this->m_viewport_size = { viewport_size.x, viewport_size.y };
-    //     this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
-    // }
+    if (this->m_viewport_size != glm::vec2{ viewport_size.x, viewport_size.y }) {
+        this->m_viewport_size = { viewport_size.x, viewport_size.y };
+        // this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
+    }
     ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->get_color_attachment_id(0), { this->m_viewport_size.x, this->m_viewport_size.y }, { 0, 1 }, { 1, 0 });
 
     ImGui::End();
