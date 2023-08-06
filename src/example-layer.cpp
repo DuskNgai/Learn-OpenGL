@@ -11,6 +11,15 @@ ExampleLayer::ExampleLayer()
 void ExampleLayer::on_attach() {
     // Camera track ball.
     this->m_trackball = std::make_unique<dusk::TrackBall>(dusk::Camera::create(dusk::CameraType::Perspective));
+    {
+        this->m_scene = std::make_unique<dusk::Scene>();
+        this->m_entity.emplace("square", this->m_scene->create_entity());
+        this->m_entity["square"].add_component<dusk::TransformComponent>();
+        this->m_entity["square"].add_component<dusk::SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
+        this->m_entity.emplace("camera", this->m_scene->create_entity());
+        this->m_entity["camera"].add_component<dusk::TransformComponent>();
+        this->m_entity["camera"].add_component<dusk::CameraComponent>(this->m_trackball->get_camera());
+    }
     // Tetrahedron.
     {
         this->m_vertex_array.emplace("tetrahedron", dusk::VertexArray::create());
@@ -178,6 +187,7 @@ void ExampleLayer::on_ImGui_render() {
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::ColorEdit4("BG color", glm::value_ptr(this->m_bg_color));
+    ImGui::ColorEdit4("FG color", glm::value_ptr(this->m_entity["square"].get_component<dusk::SpriteComponent>().color));
 
     // Set camera.
     static std::size_t camera_type_idx{ (std::size_t)dusk::CameraType::Perspective };
@@ -250,6 +260,7 @@ void ExampleLayer::on_update() {
 
         dusk::Renderer::end_scene();
     }
+    this->m_scene->on_update();
     {
         dusk::Renderer2D::begin_scene(this->m_trackball->get_camera());
 

@@ -8,6 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PROJECT_NAME "LearnOpenGL")
 project(${PROJECT_NAME} LANGUAGES C CXX)
 
+# Building type
+set(CMAKE_BUILD_TYPE "Release")
+
 # Compiler flags
 if(MSVC)
     add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
@@ -18,9 +21,6 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wno-unused-variable")
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
-
-# Building type
-set(CMAKE_BUILD_TYPE "Release")
 
 # Output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")

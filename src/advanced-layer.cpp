@@ -144,7 +144,8 @@ void AdvancedLayer::on_update() {
 
     // Draw the texture by their distance (far to near) to the camera.
     std::sort(this->vegetation.begin(), this->vegetation.end(), [&](glm::vec3 const& lhs, glm::vec3 const& rhs) {
-        return glm::length(this->m_trackball->get_look_from() - lhs) > glm::length(this->m_trackball->get_look_from() - rhs);
+        auto&& target{ this->m_trackball->get_look_from() };
+        return glm::length(target - lhs) > glm::length(target - rhs);
     });
     for (auto i : dusk::range(this->vegetation.size())) {
         model = glm::translate(glm::mat4(1.0f), vegetation[i] + glm::vec3(0.5f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));

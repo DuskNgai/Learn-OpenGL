@@ -18,6 +18,10 @@ private:
 
     std::unique_ptr<dusk::TrackBall> m_trackball;
 
+    std::unique_ptr<dusk::Scene> m_scene;
+
+    std::unordered_map<std::string, dusk::Entity> m_entity;
+
     glm::vec2 m_viewport_size{ 0.0f, 0.0f };
     glm::vec4 m_bg_color{ 0.1f, 0.1f, 0.1f, 1.0f };
 
