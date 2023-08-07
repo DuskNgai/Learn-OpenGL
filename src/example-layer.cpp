@@ -223,7 +223,7 @@ void ExampleLayer::on_ImGui_render() {
         this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
         this->m_trackball->set_aspect_ratio(this->m_viewport_size.x / this->m_viewport_size.y);
     }
-    ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->get_color_attachment_id(0), { this->m_viewport_size.x, this->m_viewport_size.y }, { 0, 1 }, { 1, 0 });
+    ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->get_color_attachment(0)->get_texture_id(), { this->m_viewport_size.x, this->m_viewport_size.y }, { 0, 1 }, { 1, 0 });
 
     ImGui::End();
     ImGui::PopStyleVar(1);

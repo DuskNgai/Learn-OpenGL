@@ -45,4 +45,6 @@ cmake --build ./build --config Release -j
     - [x] Depth Testing
     - [ ] Stencil Testing
     - [x] Blending
+    - [ ] Face Culling
     - [x] Framebuffers
+    - [ ] Cubemaps
