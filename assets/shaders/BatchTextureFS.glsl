@@ -11,5 +11,6 @@ in float v_TilingScale;
 uniform sampler2D u_Textures[32];
 
 void main() {
-    color = texture(u_Textures[int(v_TexIndex)], v_TexCoord * v_TilingScale) * v_Color;
+    // Adding 0.5 to prevent floating point errors.
+    color = texture(u_Textures[int(v_TexIndex + 0.5)], v_TexCoord * v_TilingScale) * v_Color;
 }

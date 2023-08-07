@@ -81,9 +81,7 @@ void ExampleLayer::on_attach() {
     // Framebuffer.
     {
         auto window{ dusk::Application::get()->get_window() };
-        auto width{ window->get_width() };
-        auto height{ window->get_height() };
-        this->m_frame_buffer = dusk::Framebuffer::create(width, height);
+        this->m_frame_buffer = dusk::Framebuffer::create(window->get_width(), window->get_height());
     }
 }
 
@@ -222,7 +220,8 @@ void ExampleLayer::on_ImGui_render() {
     auto viewport_size{ ImGui::GetContentRegionAvail() };
     if (this->m_viewport_size != glm::vec2{ viewport_size.x, viewport_size.y }) {
         this->m_viewport_size = { viewport_size.x, viewport_size.y };
-        // this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
+        this->m_frame_buffer->resize(this->m_viewport_size.x, this->m_viewport_size.y);
+        this->m_trackball->set_aspect_ratio(this->m_viewport_size.x / this->m_viewport_size.y);
     }
     ImGui::Image((ImTextureID)(std::size_t)this->m_frame_buffer->get_color_attachment_id(0), { this->m_viewport_size.x, this->m_viewport_size.y }, { 0, 1 }, { 1, 0 });
 
@@ -237,6 +236,7 @@ void ExampleLayer::on_update() {
     this->m_frame_buffer->bind();
     dusk::RenderCommand::clear();
     dusk::RenderCommand::set_clear_color(this->m_bg_color);
+    dusk::RenderCommand::set_viewport(0, 0, this->m_viewport_size.x, this->m_viewport_size.y);
 
     if (this->m_is_viewport_focused) {
         this->m_trackball->on_update();
@@ -284,9 +284,15 @@ void ExampleLayer::on_update() {
 }
 
 void ExampleLayer::on_event(dusk::EventBase& e) {
+    dusk::EventDispatcher dispatcher{ e };
+    dispatcher.dispatch<dusk::WindowResizeEvent>(DUSK_BIND_CLASS_FN(ExampleLayer::on_window_resize));
     if (this->m_is_viewport_focused) {
         this->m_trackball->on_event(e);
     }
+}
+
+bool ExampleLayer::on_window_resize([[maybe_unused]] dusk::WindowResizeEvent& e) {
+    return true;
 }
 
 LEARN_OPENGL_NAMESPACE_END

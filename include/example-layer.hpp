@@ -37,6 +37,9 @@ public:
     virtual void on_ImGui_render() override;
     virtual void on_update() override;
     virtual void on_event(dusk::EventBase& e) override;
+
+private:
+    bool on_window_resize(dusk::WindowResizeEvent& e);
 };
 
 LEARN_OPENGL_NAMESPACE_END

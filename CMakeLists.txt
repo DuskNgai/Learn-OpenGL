@@ -8,9 +8,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PROJECT_NAME "LearnOpenGL")
 project(${PROJECT_NAME} LANGUAGES C CXX)
 
-# Building type
-set(CMAKE_BUILD_TYPE "Release")
-
 # Compiler flags
 if(MSVC)
     add_compile_definitions("_CRT_SECURE_NO_WARNINGS")

@@ -39,17 +39,17 @@ void AdvancedLayer::on_attach() {
     {
         this->m_shader_library = std::make_unique<dusk::ShaderLibrary>();
         this->m_shader_library->emplace(
-            "DepthTest",
-            dusk::Shader::create(
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/advanced/DepthTestVS.glsl")),
-                dusk::read_text_file(dusk::get_file_path("assets/shaders/advanced/DepthTestFS.glsl"))
-            )
-        );
-        this->m_shader_library->emplace(
             "Blending",
             dusk::Shader::create(
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/advanced/DepthTestVS.glsl")),
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/advanced/BlendingFS.glsl"))
+            )
+        );
+        this->m_shader_library->emplace(
+            "DepthTest",
+            dusk::Shader::create(
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/advanced/DepthTestVS.glsl")),
+                dusk::read_text_file(dusk::get_file_path("assets/shaders/advanced/DepthTestFS.glsl"))
             )
         );
 
