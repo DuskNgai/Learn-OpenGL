@@ -4,7 +4,7 @@
 #include <sandbox.hpp>
 
 int main(int argc, char** argv) {
-    dusk::Log::init();
+    dusk::Log::initialize();
     DUSK_CORE_INFO("Initialized Log.");
 
     // TODO: argparser

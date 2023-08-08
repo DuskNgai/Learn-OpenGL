@@ -16,8 +16,8 @@ cd Learn-OpenGL
 git submodule sync --recursive
 git submodule update --init --recursive
 
-cmake -B ./build
-cmake --build ./build --config Release -j
+cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Release
+cmake --build ./build --config Release --parallel
 ```
 
 ## Todo List
