@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 # Set C++ compiler flags before `project`
 set(CMAKE_CXX_STANDARD 17)
@@ -16,8 +16,9 @@ if(MSVC)
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wfatal-errors -Wall -Wextra")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wno-unused-variable")
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")

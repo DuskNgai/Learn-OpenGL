@@ -8,7 +8,7 @@ LEARN_OPENGL_NAMESPACE_BEGIN
 
 class ExampleLayer : public dusk::Layer {
 private:
-    std::unique_ptr<dusk::ShaderLibrary> m_shader_library;
+    std::unordered_map<std::string, std::shared_ptr<dusk::Shader>> m_shader;
 
     std::unordered_map<std::string, std::unique_ptr<dusk::VertexArray>> m_vertex_array;
 

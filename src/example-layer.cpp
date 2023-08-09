@@ -51,9 +51,8 @@ void ExampleLayer::on_attach() {
     }
     // A shader library for managing shaders.
     {
-        this->m_shader_library = std::make_unique<dusk::ShaderLibrary>();
         // Shader for tetrahedron.
-        this->m_shader_library->emplace(
+        this->m_shader.emplace(
             "First",
             dusk::Shader::create(
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/FirstVS.glsl")),
@@ -61,7 +60,7 @@ void ExampleLayer::on_attach() {
             )
         );
         // Shader for texture quad.
-        this->m_shader_library->emplace(
+        this->m_shader.emplace(
             "Texture",
             dusk::Shader::create(
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/TextureVS.glsl")),
@@ -70,8 +69,8 @@ void ExampleLayer::on_attach() {
         );
         // Bindings uniform variable to shader.
         auto sampler{ dusk::IntegerSequenceToArray(std::make_integer_sequence<int, 32>{}) };
-        this->m_shader_library->get("Texture")->bind();
-        this->m_shader_library->get("Texture")->set_int_array("u_Textures", sampler.data(), sampler.size());
+        this->m_shader["Texture"]->bind();
+        this->m_shader["Texture"]->set_int_array("u_Textures", sampler.data(), sampler.size());
     }
     // Texture.
     {
@@ -249,14 +248,14 @@ void ExampleLayer::on_update() {
             for (int x{ -1 }; x <= 1; ++x) {
                 glm::vec3 translate{ 1.0f * x, 1.0f * y, 0.0f };
                 glm::mat4 model{ glm::translate(glm::mat4(1.0f), translate) * scale };
-                dusk::Renderer::submit(this->m_shader_library->get("First"), this->m_vertex_array["tetrahedron"], model);
+                dusk::Renderer::submit(this->m_shader["First"], this->m_vertex_array["tetrahedron"], model);
             }
         }
 
         this->m_texture["awesomeface"]->bind(0);
-        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.5f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        dusk::Renderer::submit(this->m_shader["Texture"], this->m_vertex_array["texture"], glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.5f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
         this->m_texture["alpha"]->bind(0);
-        dusk::Renderer::submit(this->m_shader_library->get("Texture"), this->m_vertex_array["texture"], glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.5f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+        dusk::Renderer::submit(this->m_shader["Texture"], this->m_vertex_array["texture"], glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.5f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
         dusk::Renderer::end_scene();
     }

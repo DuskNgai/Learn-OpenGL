@@ -1,12 +1,12 @@
 # Learn OpenGL
 
-这个仓库以及[ Dusk 引擎](https://github.com/DuskNgai/Dusk)包含了我学习 `OpenGL` 的过程中的大部分代码，主要是一些 `OpenGL` 的基础知识，以及一些常用的 `OpenGL` 使用方法，大部分的笔记存储于 Dusk 引擎中。这个项目还有一个作用是测试初代 Dusk 引擎。
+这个仓库以及 [Dusk 引擎](https://github.com/DuskNgai/Dusk)包含了我学习 `OpenGL` 的过程中的大部分代码，主要是一些 `OpenGL` 的基础知识，以及一些常用的 `OpenGL` 使用方法，大部分的笔记存储于 Dusk 引擎中。这个项目还有一个作用是测试初代 Dusk 引擎。
 
 ## Requirement & Usage
 
 - 一个支持 `C++17` 标准的编译器。我们在以下平台 + 编译器的组合上测试了我们的程序：
     - `Windows` + `Visual Studio 2022`
-    - `Ubuntu 20.04/22.04` + `GCC 11.3/Clang 13.0.0`
+    - `Ubuntu 20.04/22.04` + `GCC 11.4/Clang 16.0.0`
 
 请按照以下的流程编译程序：
 

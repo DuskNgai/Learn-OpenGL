@@ -32,22 +32,21 @@ void LightLayer::on_attach() {
     }
     // A shader library for managing shaders.
     {
-        this->m_shader_library = std::make_unique<dusk::ShaderLibrary>();
-        this->m_shader_library->emplace(
+        this->m_shader.emplace(
             "PureColor",
             dusk::Shader::create(
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVS.glsl")),
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/PureColorFS.glsl"))
             )
         );
-        this->m_shader_library->emplace(
+        this->m_shader.emplace(
             "Texture",
             dusk::Shader::create(
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVS.glsl")),
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/TextureFS.glsl"))
             )
         );
-        this->m_shader_library->emplace(
+        this->m_shader.emplace(
             "Light",
             dusk::Shader::create(
                 dusk::read_text_file(dusk::get_file_path("assets/shaders/lighting/ObjectVS.glsl")),
@@ -85,12 +84,15 @@ void LightLayer::on_attach() {
             {   "Cyan rubber",              PureColorMaterial::create(glm::vec3{ 0.0f, 0.05f, 0.05f },                glm::vec3{ 0.4f, 0.5f, 0.5f },                     glm::vec3{ 0.04f, 0.7f, 0.7f }, 10.0f)}
         };
         for (auto&& [name, material] : this->m_material) {
-            material->set_shader(this->m_shader_library->get("PureColor"));
+            material->set_shader(this->m_shader["PureColor"]);
         }
-        this->m_material.emplace("Texture", TextureMaterial::create(dusk::Texture2D::create(dusk::get_file_path("assets/images/container2.png")), dusk::Texture2D::create(dusk::get_file_path("assets/images/container2_specular.png")), 64.0f, this->m_shader_library->get("Texture")));
+        this->m_material.emplace("Texture", TextureMaterial::create(dusk::Texture2D::create(dusk::get_file_path("assets/images/container2.png")), dusk::Texture2D::create(dusk::get_file_path("assets/images/container2_specular.png")), 64.0f, this->m_shader["Texture"]));
 
         this->m_light.emplace("Directional", DirectionalLight::create(glm::vec3{ 1.2f, 1.0f, 2.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, glm::vec3{ 0.2f, 0.2f, 0.2f }, glm::vec3{ 0.5f, 0.5f, 0.5f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
         this->m_light.emplace("Point", PointLight::create(glm::vec3{ 1.2f, 1.0f, 2.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, glm::vec3{ 0.2f, 0.2f, 0.2f }, glm::vec3{ 0.5f, 0.5f, 0.5f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
+    
+        this->m_selected_material = this->m_material.begin()->first;
+        this->m_selected_light = this->m_light.begin()->first;
     }
 }
 
@@ -123,11 +125,11 @@ void LightLayer::on_ImGui_render() {
     }
     this->m_trackball->set_camera_type((dusk::CameraType)camera_type_idx);
 
-    if (ImGui::BeginCombo("Material Option", this->m_material.get_selected().first.c_str())) {
-        for (auto i : dusk::range(this->m_material.size())) {
-            bool is_selected{ (this->m_material.get_selected_index() == i) };
-            if (ImGui::Selectable(this->m_material.get(i).first.c_str(), is_selected)) {
-                this->m_material.set_selected_index(i);
+    if (ImGui::BeginCombo("Material Option", this->m_selected_material.c_str())) {
+        for (auto&& [name, material] : this->m_material) {
+            bool is_selected{ (this->m_selected_material == name) };
+            if (ImGui::Selectable(name.c_str(), is_selected)) {
+                this->m_selected_material = name;
             }
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();
@@ -136,11 +138,11 @@ void LightLayer::on_ImGui_render() {
         ImGui::EndCombo();
     }
 
-    if (ImGui::BeginCombo("Light Option", this->m_light.get_selected().first.c_str())) {
-        for (auto i : dusk::range(this->m_light.size())) {
-            bool is_selected{ (this->m_light.get_selected_index() == i) };
-            if (ImGui::Selectable(this->m_light.get(i).first.c_str(), is_selected)) {
-                this->m_light.set_selected_index(i);
+    if (ImGui::BeginCombo("Light Option", this->m_selected_light.c_str())) {
+        for (auto&& [name, light] : this->m_light) {
+            bool is_selected{ (this->m_selected_light == name) };
+            if (ImGui::Selectable(name.c_str(), is_selected)) {
+                this->m_selected_light = name;
             }
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();
@@ -148,11 +150,11 @@ void LightLayer::on_ImGui_render() {
         }
         ImGui::EndCombo();
     }
-    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light.get_selected().second->color));
-    if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(this->m_light.get_selected().second) }) {
+    ImGui::ColorEdit3("Light Intensity", glm::value_ptr(this->m_light[this->m_selected_light]->color));
+    if (auto dl{ std::dynamic_pointer_cast<DirectionalLight>(this->m_light[this->m_selected_light]) }) {
         ImGui::DragFloat3("Light Direction", glm::value_ptr(dl->direction), 0.05f);
     }
-    else if (auto pl{ std::dynamic_pointer_cast<PointLight>(this->m_light.get_selected().second) }) {
+    else if (auto pl{ std::dynamic_pointer_cast<PointLight>(this->m_light[this->m_selected_light]) }) {
         ImGui::DragFloat3("Light Position", glm::value_ptr(pl->position), 0.05f);
     }
 
@@ -167,9 +169,9 @@ void LightLayer::on_update() {
 
     dusk::Renderer::begin_scene(this->m_trackball->get_camera());
 
-    auto m{ this->m_material.get_selected().second };
+    auto m{ this->m_material[this->m_selected_material] };
     m->bind("u_Material");
-    auto l{ this->m_light.get_selected().second };
+    auto l{ this->m_light[this->m_selected_light] };
     l->set_shader(m->get_shader());
     l->bind("u_Light");
     dusk::Renderer::submit(m->get_shader(), this->m_vao["cube"], glm::mat4(1.0f));
@@ -181,7 +183,7 @@ void LightLayer::on_update() {
     else if (auto pl{ std::dynamic_pointer_cast<PointLight>(l) }) {
         model = glm::translate(glm::mat4(1.0f), pl->position) * model;
     }
-    auto light_shader{ this->m_shader_library->get("Light") };
+    auto light_shader{ this->m_shader["Light"] };
     light_shader->bind();
     light_shader->set_vec3("u_LightColor", l->color);
     dusk::Renderer::submit(light_shader, this->m_vao["light"], model);
